@@ -1,0 +1,197 @@
+/* VARIABLES / BASE */
+
+.container {
+  min-height: 100vh;
+  padding: 0 1rem;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: #ffffff;
+  background-color: #030303;
+  background-image:
+    radial-gradient(circle at 50% -20%, #1a1a1a 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, #0a0a0a 0%, transparent 40%);
+}
+
+/* LAYOUT GENERAL */
+
+.nav,
+.hero,
+.appSection,
+.featureGrid {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+}
+
+.hero {
+  text-align: center;
+  padding: 3rem 0;
+  max-width: 800px;
+}
+
+.appSection {
+  margin: 2rem auto 5rem;
+  max-width: 900px;
+}
+
+/* HERO */
+
+.badge {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  color: #888;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.title {
+  margin-bottom: 1.5rem;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -2px;
+}
+
+.title span {
+  background: linear-gradient(90deg, #fff, #888);
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #888;
+}
+
+/* CARD / CONTENEDORES */
+
+.glassCard {
+  padding: 5rem;
+  border-radius: 24px;
+  background: rgba(15, 15, 15, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+/* FORM HEADER / TOGGLES */
+
+.formHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.toggleGroup {
+  padding: 4px;
+  border-radius: 10px;
+  background: #111;
+}
+
+.toggleGroup button {
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.toggleGroup button.activeTab {
+  background: #222;
+  color: #fff;
+}
+
+/* FORM GRID */
+
+.gridInputs {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* INPUTS */
+
+.inputField label,
+.constraintsArea label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mainInput,
+.selectInput,
+.constraintsArea textarea {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  color: #fff;
+  background: #0a0a0a;
+  border: 1px solid #222;
+  transition: border 0.3s;
+  resize: none;
+}
+
+.selectInput {
+  border-radius: 0 12px 12px 0;
+}
+
+/* BOTONES */
+
+.btnPrimary {
+  width: 100%;
+  margin-top: 2rem;
+  padding: 1.2rem;
+  border-radius: 12px;
+  border: none;
+  background: #fff;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  background: #e0e0e0;
+}
+
+/* TEXTO SECUNDARIO*/
+
+.disclaimer {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: #444;
+  text-align: center;
+}
+
+/*FEATURES*/
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 2rem 0;
+  text-align: center;
+  border-top: 1px solid #555;
+}
+
+.featureItem h4 {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.featureItem p {
+  font-size: 0.9rem;
+  color: #555;
+}
