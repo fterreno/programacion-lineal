@@ -5,7 +5,7 @@ import type { SolicitudProblema } from '../models/DTOs/solicitudProblema';
 import type { Tipo } from '../models/domain/tipo';
 import type { FuncionObjetivo } from '../models/domain/funcionObjetivo';
 import type { MetodoTipo } from '../models/domain/metodoTipo';
-import type { Operador } from '../models/domain/operador';
+import { operadorMappeo } from '../models/domain/operador';
 
 const API_URL = 'http://localhost:8080/api/pl';
 
@@ -16,14 +16,14 @@ const convertirTermino = (terminos_string: string): Termino[] => {
   const terminos: Termino[] = [];
 
   // Sin espacios y aseguramos que cada término tenga explícitamente un signo. Luego divide cada termino en un array
-  const terminos_array = terminos_string.replace(/\s+/g, "").replace(/(^|(?<=[+-]))(?=[^+-])/g, '+').split(/(?=[+-])/);
+  const terminos_array = terminos_string.replace(/\s+/g, "").split(/(?=[+-])/);
   const expresion_regular = /^([+-]?\d*\.?\d*)?([a-zA-Z]\d*)?(?:\^(\d+))?$/;
-
+  
   terminos_array.forEach((elemento) => {
     const termino_seccion = elemento.match(expresion_regular);
     if (termino_seccion) {
       let [, coeficiente_str, variable, exponente_str] = termino_seccion;
-
+      
       // Determinar coeficiente
       let coeficiente: number;
       if (!coeficiente_str || coeficiente_str === '+' || coeficiente_str === '-') {
@@ -31,7 +31,7 @@ const convertirTermino = (terminos_string: string): Termino[] => {
       } else {
         coeficiente = parseFloat(coeficiente_str);
         if (isNaN(coeficiente)) {
-          throw new Error(`Coeficiente inválido en término: "${elemento}"`);
+          throw new Error(`Coeficiente inválido.`);
         }
       }
 
@@ -40,7 +40,7 @@ const convertirTermino = (terminos_string: string): Termino[] => {
 
       terminos.push({
         coeficiente: coeficiente,
-        variable: variable || null,
+        variable: variable || "",
         exponente,
       });
     }
@@ -59,26 +59,26 @@ const convertirRestricciones = (restriccion_string: string): Restriccion[] => {
     linea = linea.replace("=>", ">=").replace("=<", "<=");
 
     // Detecta operador
-    const operador_expresion = linea.match(/^(.+?)(<=|>=|=|<|>)(.+)$/);
+    const operador_expresion = linea.match(/^(.+?)(<=|>=|=|<|>|=<|=>)(.+)$/);
     if (!operador_expresion) {
-      console.warn(`Restricción ignorada, formato inválido: "${linea_str}"`);
-      return;
+      throw new Error(`Restricción ignorada, formato inválido.`);
     }
 
     let [, lado_izquierdo, operador_str, lado_derecho] = operador_expresion;
 
-    const operador_normalizado: Operador = operador_str as Operador;
-
+    const operador_normalizado = operadorMappeo[operador_str];
+    if (!operador_normalizado) throw new Error(`Restricción ignorada, operador inválido.`);
+    
     // Convertir lado derecho a número (acepta negativos)
-    const limite_float = parseFloat(lado_derecho);
-    if (isNaN(limite_float)) {
-      throw new Error(`Valor inválido en el lado derecho de la restricción: "${lado_derecho}". Recordar que en el lado derecho se debe encontrar la exprecion que no posee variables.`);
+    const lado_derecho_float = parseFloat(lado_derecho);
+    if (isNaN(lado_derecho_float)) {
+      throw new Error(`Restricción ignorada, lado derecho inválido.`);
     }
 
     restricciones.push({
-      limite: limite_float,
+      vld: lado_derecho_float,
       operador: operador_normalizado,
-      vld: convertirTermino(lado_izquierdo),
+      funcionRestricciones: convertirTermino(lado_izquierdo),
     });
   });
 

@@ -4,6 +4,6 @@ import lombok.Data;
 @Data
 public class Termino {
     private double coeficiente;
-    private String variable; // null si es un término constante
+    private String variable;
     private double exponente;
 }
