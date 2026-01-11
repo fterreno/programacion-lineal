@@ -14,11 +14,8 @@ public class MetodoSimplex implements MetodosPL {
     @Override
     public SolicitudRespuesta resolver(ProblemaPL problema) {
 
-        problema.getFuncionObjetivo().validar();
-        problema.getRestricciones().forEach(Restriccion::validar);
-
-        //Identificación de una solución factible básica.
-        primeraFase(problema);
+        problema.validar();
+        primeraFase(problema); //Identificación de una solución factible básica.
 
         //segundaFase
         // Criterio de detención
@@ -29,15 +26,14 @@ public class MetodoSimplex implements MetodosPL {
     }
 
     public void primeraFase(ProblemaPL problema){
-        // Convertir el modelo a su forma estándar.
+        problema.agregarVariablesHolgura(); // Convertir el modelo a su forma estándar.
 
-        //Se agregan las restricciones de holgura. VLD sin numeros negativos
-        problema.setRestricciones(Restriccion.validarVLDNoNegativo(problema.getRestricciones()));
-        problema.setRestricciones(Restriccion.variablesHolgura(problema.getRestricciones()));
-        //Se agregarn las variables de holgura en la funcion objetivo
-        problema.setFuncionObjetivo(FuncionObjetivo.variablesHolgura(problema.getFuncionObjetivo()));
-        //Se guardan las restricciones de no negatividad
-        List<String> variablesNoNegatividad = Restriccion.restriccionNoNegatividad(problema.getRestricciones());
+        if (!problema.verificarVariables(problema)) {
+            throw new IllegalArgumentException("Todas las variables de la función objetivo deben aparecer en al menos una restricción.");
+        }
+        problema.agregarVariablesNoNegatividad();
+
+        //generar matriz inicial
     }
 
     public void segundaFase(){

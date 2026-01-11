@@ -1,6 +1,10 @@
 package terreno.programacionlinealbackend.models.domain;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import lombok.Data;
 
 @Data
@@ -28,26 +32,26 @@ public class FuncionObjetivo {
         }
     }
 
-    public static FuncionObjetivo variablesHolgura(FuncionObjetivo funcionObjetivo) {
-        List<Termino> terminos = funcionObjetivo.getTermino();
-        List<Termino> holguras = new ArrayList<>(); // Lista temporal para nuevas variables
+    public static FuncionObjetivo variablesHolgura(ProblemaPL problema) {
+
+        FuncionObjetivo funcionObjetivo = problema.getFuncionObjetivo();
+        List<Termino> nuevosTerminos = new ArrayList<>(funcionObjetivo.getTermino());
+
         int nro = 1;
 
-        for (Termino t : terminos) {
-            if (t.getVariable() != null && !t.getVariable().isEmpty()) {
-                Termino holgura = new Termino();
-                holgura.setCoeficiente(0);
-                holgura.setVariable("S" + nro);
-                holgura.setExponente(1);
-                holguras.add(holgura);
-                nro++;
-            }
+        for (Restriccion restriccion : problema.getRestricciones()) {
+            Termino holgura = new Termino();
+            holgura.setCoeficiente(0);
+            holgura.setVariable("S" + nro);
+            holgura.setExponente(1);
+
+            nuevosTerminos.add(holgura);
+            nro++;
         }
 
-        terminos.addAll(holguras); // Agregamos las holguras al final
-        funcionObjetivo.setTermino(terminos);
-
+        funcionObjetivo.setTermino(nuevosTerminos);
         return funcionObjetivo;
     }
+
 
 }
