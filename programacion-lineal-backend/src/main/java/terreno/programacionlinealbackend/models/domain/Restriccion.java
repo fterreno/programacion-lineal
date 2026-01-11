@@ -1,7 +1,6 @@
 package terreno.programacionlinealbackend.models.domain;
 
 import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -106,5 +105,13 @@ public class Restriccion {
             }
         }
         return variables;
+    }
+
+    public String obtenerBase() {
+        return this.funcionRestricciones.stream()
+                .filter(t -> t.getVariable().startsWith("S") && t.getCoeficiente() == 1.0)
+                .map(Termino::getVariable)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No se encontró ninguna variable de holgura válida para ser base"));
     }
 }

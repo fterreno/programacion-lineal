@@ -1,7 +1,6 @@
 package terreno.programacionlinealbackend.models.domain;
 
 import lombok.Data;
-
 import java.util.*;
 
 @Data
@@ -58,9 +57,9 @@ public class ProblemaPL {
         return vars;
     }
 
+    // Me impiden salir del cuadarante positivo del eje cartesiano
     public List<String> agregarVariablesNoNegatividad() {
-        List<String> variablesNoNegatividad = Restriccion.restriccionNoNegatividad(this.restricciones);
-        return variablesNoNegatividad;
+        return Restriccion.restriccionNoNegatividad(this.restricciones);
     }
 
     //Todas las variables de la funcion objetivo se deben encontrar en el conjunto de restriccciones
@@ -84,106 +83,53 @@ public class ProblemaPL {
     public void generarMatrizInicial() {
         MatrizSimplex matriz = new MatrizSimplex();
 
-        // Determinar todas las variables (originales + holguras)
-        Set<String> todasVariables = new LinkedHashSet<>();
-        for (Termino t : this.getFuncionObjetivo().getTermino()) {
-            todasVariables.add(t.getVariable());
-        }
-        for (Restriccion r : this.getRestricciones()) {
-            for (Termino t : r.getFuncionRestricciones()) {
-                todasVariables.add(t.getVariable());
-            }
-        }
-        List<String> variables = new ArrayList<>(todasVariables); // Solo variables
-        matriz.setF_etiqueta(variables); // etiquetas solo de variables
+        // Definir etiquetas, los nombres de las variables (originales + holguras)
+        List<String> etiquetas = new ArrayList<>();
+        funcionObjetivo.getTermino().forEach(t -> etiquetas.add(t.getVariable()));
+        matriz.setF_etiqueta(etiquetas);
 
-        // Coeficientes de la función objetivo (f_cj)
-        List<Double> f_cj = new ArrayList<>();
-        for (String var : variables) {
-            Optional<Termino> termino = this.funcionObjetivo.getTermino().stream()
-                    .filter(t -> t.getVariable().equals(var))
-                    .findFirst();
-            f_cj.add(termino.map(Termino::getCoeficiente).orElse(0.0));
-        }
-        matriz.setF_cj(f_cj);
+        // Definir los coeficientes Cj desde la FuncionObjetivo
+        matriz.setF_cj(this.funcionObjetivo.obtenerCj(etiquetas));
 
-        // Variables base (c_base), coef CB y VLD
-        List<String> c_base = new ArrayList<>();
-        List<Double> c_cb = new ArrayList<>();
-        List<Double> c_vld = new ArrayList<>();
+        // Cargar la matriz de las filas desde las Restricciones
+        configurarMatrizRestricciones(matriz, etiquetas);
 
-        for (Restriccion r : this.getRestricciones()) {
-            // Se asume que la base inicial son las variables de holgura
-            Optional<Termino> baseTerm = r.getFuncionRestricciones().stream()
-                    .filter(t -> t.getVariable().startsWith("S") && t.getCoeficiente() == 1.0)
-                    .findFirst();
-
-            if (baseTerm.isPresent()) {
-                c_base.add(baseTerm.get().getVariable());
-                c_cb.add(0.0);
-            } else {
-                // Si no hay holgura, tomamos la primera variable como base
-                Termino t = r.getFuncionRestricciones().get(0);
-                c_base.add(t.getVariable());
-                int idx = variables.indexOf(t.getVariable());
-                c_cb.add(f_cj.get(idx));
-            }
-
-            c_vld.add(r.getVld());
-        }
-
-        matriz.setC_base(c_base);
-        matriz.setC_cb(c_cb);
-        matriz.setC_vld(c_vld);
-
-        // Construir matriz de restricciones (solo columnas de variables)
-        int filas = this.getRestricciones().size();
-        int cols = variables.size();
-        double[][] m_restricciones = new double[filas][cols];
-
-        for (int i = 0; i < filas; i++) {
-            Restriccion r = this.getRestricciones().get(i);
-            for (Termino t : r.getFuncionRestricciones()) {
-                int colIndex = variables.indexOf(t.getVariable());
-                if (colIndex >= 0) {
-                    m_restricciones[i][colIndex] = t.getCoeficiente();
-                }
-            }
-        }
-
-        matriz.setM_restricciones(m_restricciones);
-
-        calcularZjCj(matriz);
-        if (this.iteraciones == null) {
-            this.iteraciones = new ArrayList<>();
-        }
+        // El objeto MatrizSimplex se autocompleta
+        matriz.calcularSolucionCoste();
         matriz.verificarVectoresUnitarios();
+
+        if (this.iteraciones == null) this.iteraciones = new ArrayList<>();
         this.iteraciones.add(matriz);
     }
 
-    public void calcularZjCj(MatrizSimplex matriz) {
-        int columnas = matriz.getF_etiqueta().size();
-        int filas = matriz.getC_base().size();
+    private void configurarMatrizRestricciones(MatrizSimplex matriz, List<String> etiquetas) {
+        int n = restricciones.size();
+        int m = etiquetas.size();
 
-        List<Double> f_zj = new ArrayList<>();
-        List<Double> f_cjZj = new ArrayList<>();
+        double[][] coeficientes = new double[n][m];
+        List<String> base = new ArrayList<>();
+        List<Double> cb = new ArrayList<>();
+        List<Double> vld = new ArrayList<>();
 
-        for (int j = 0; j < columnas; j++) {
-            double zj = 0.0;
-            // Zj = sumatoria de CB_i * a_ij
-            for (int i = 0; i < filas; i++) {
-                double cb = matriz.getC_cb().get(i);
-                double aij = matriz.getM_restricciones()[i][j];
-                zj += cb * aij;
+        for (int i = 0; i < n; i++) {
+            Restriccion r = restricciones.get(i);
+            vld.add(r.getVld());
+
+            // Llenar matriz de coeficientes
+            for (Termino t : r.getFuncionRestricciones()) {
+                int col = etiquetas.indexOf(t.getVariable());
+                coeficientes[i][col] = t.getCoeficiente();
             }
-            f_zj.add(zj);
 
-            // Cj - Zj
-            double cj = matriz.getF_cj().get(j);
-            f_cjZj.add(cj - zj);
+            // Lógica de Base, la restricción decide cuál es su variable de holgura
+            String varBase = r.obtenerBase();
+            base.add(varBase);
+            cb.add(this.funcionObjetivo.obtenerCoeficienteDe(varBase));
         }
 
-        matriz.setF_zj(f_zj);
-        matriz.setF_cjZj(f_cjZj);
+        matriz.setM_restricciones(coeficientes);
+        matriz.setC_base(base);
+        matriz.setC_cb(cb);
+        matriz.setC_vld(vld);
     }
 }

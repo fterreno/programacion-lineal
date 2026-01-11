@@ -2,7 +2,6 @@ package terreno.programacionlinealbackend.models.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.Data;
 
 @Data
@@ -48,5 +47,21 @@ public class FuncionObjetivo {
                 this.termino.add(holgura);
             }
         }
+    }
+
+    public List<Double> obtenerCj(List<String> etiquetas) {
+        List<Double> f_cj = new ArrayList<>();
+        for (String var : etiquetas) {f_cj.add(obtenerCoeficienteDe(var));}
+        return f_cj;
+    }
+
+    // FuncionObjetivo es la única que sabe cuánto vale una variable.
+    public double obtenerCoeficienteDe(String variable) {
+        return this.termino.stream()
+                .filter(t -> t.getVariable().equals(variable))
+                .findFirst()
+                .map(Termino::getCoeficiente)
+                .orElseThrow(() ->new IllegalArgumentException("La variable '" + variable + "' no existe en la función objetivo")
+                );
     }
 }
