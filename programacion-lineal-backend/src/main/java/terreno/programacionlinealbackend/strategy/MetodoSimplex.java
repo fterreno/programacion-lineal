@@ -2,12 +2,7 @@ package terreno.programacionlinealbackend.strategy;
 
 import org.springframework.stereotype.Component;
 import terreno.programacionlinealbackend.models.DTOs.SolicitudRespuesta;
-import terreno.programacionlinealbackend.models.domain.FuncionObjetivo;
 import terreno.programacionlinealbackend.models.domain.ProblemaPL;
-import terreno.programacionlinealbackend.models.domain.Restriccion;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class MetodoSimplex implements MetodosPL {
@@ -37,9 +32,9 @@ public class MetodoSimplex implements MetodosPL {
             throw new IllegalArgumentException("Todas las variables de la función objetivo deben aparecer en al menos una restricción.");
         }
         problema.agregarVariablesNoNegatividad();
-        //problema.generarMatrizInicial();
+        // Corroborar que tenga m vectores unitarios, si existe una igualdad se utiliza una variable artificial
+        problema.generarMatrizInicial();
 
-        //generar matriz inicial
     }
 
     public void segundaFase(){
