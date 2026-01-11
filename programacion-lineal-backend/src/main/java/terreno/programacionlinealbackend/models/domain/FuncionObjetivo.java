@@ -40,18 +40,19 @@ public class FuncionObjetivo {
         int nro = 1;
 
         for (Restriccion restriccion : problema.getRestricciones()) {
-            Termino holgura = new Termino();
-            holgura.setCoeficiente(0);
-            holgura.setVariable("S" + nro);
-            holgura.setExponente(1);
+            if (restriccion.getOperador() != Operador.igual){
+                Termino holgura = new Termino();
+                holgura.setCoeficiente(0);
+                holgura.setVariable("S" + nro);
+                holgura.setExponente(1);
 
-            nuevosTerminos.add(holgura);
-            nro++;
+                nuevosTerminos.add(holgura);
+                nro++;
+            }
         }
 
         funcionObjetivo.setTermino(nuevosTerminos);
         return funcionObjetivo;
     }
-
 
 }

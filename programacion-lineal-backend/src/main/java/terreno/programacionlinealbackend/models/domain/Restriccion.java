@@ -1,7 +1,9 @@
 package terreno.programacionlinealbackend.models.domain;
+
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Data
@@ -41,34 +43,75 @@ public class Restriccion {
     }
 
     //Validar el ingreso de las restricciones
-    public static List<Restriccion> variablesHolgura(List<Restriccion> restricciones) {
-        // menorIgual: Variable Holgura se suma
-        // mayorIgual: Variable Holgura se resta
-        // igual: No existe variable de holgura
+    public static List<Restriccion> variablesHolgura(ProblemaPL problema) {
+        List<Restriccion> restricciones = problema.getRestricciones();
+        int nro = 1; // contador de variables de holgura
+        List<String> nombresHolgura = new ArrayList<>();
 
-        int nro = 1; // contador de variables de holgura/exceso
-        for (Restriccion restriccion : restricciones) {
-            Operador op = restriccion.getOperador();
-            if (op == Operador.menorIgual || op == Operador.menor) {
-                // agregar variable de holgura positiva
+        // Crear holguras según operador
+        for (Restriccion r : restricciones) {
+            Operador op = r.getOperador();
+
+            // Solo agregar variable de holgura si no es igualdad
+            if (op != Operador.igual) {
                 Termino holgura = new Termino();
-                holgura.setCoeficiente(1);
                 holgura.setVariable("S" + nro);
                 holgura.setExponente(1);
-                restriccion.getFuncionRestricciones().add(holgura);
-                nro++;
-            } else if (op == Operador.mayorIgual || op == Operador.mayor) {
-                // agregar variable de exceso negativa
-                Termino exceso = new Termino();
-                exceso.setCoeficiente(-1);
-                exceso.setVariable("S" + nro);
-                exceso.setExponente(1);
-                restriccion.getFuncionRestricciones().add(exceso);
+
+                if (op == Operador.menorIgual || op == Operador.menor) {
+                    holgura.setCoeficiente(1.0); // holgura positiva
+                } else if (op == Operador.mayorIgual || op == Operador.mayor) {
+                    holgura.setCoeficiente(-1.0); // exceso negativa
+                }
+
+                r.getFuncionRestricciones().add(holgura);
+                nombresHolgura.add("S" + nro);
                 nro++;
             }
         }
+
+        // Asegurarse de que todas las restricciones tengan todas las variables de holgura
+        List<String> todasVariables = new ArrayList<>();
+        // Variables de la función objetivo
+        for (Termino t : problema.getFuncionObjetivo().getTermino()) {
+            if (!todasVariables.contains(t.getVariable())) {
+                todasVariables.add(t.getVariable());
+            }
+        }
+        // Variables de holgura
+        todasVariables.addAll(nombresHolgura);
+
+        // Asegurarse que todas las restricciones tengan todas las variables
+        for (Restriccion r : restricciones) {
+            List<String> varsExistentes = r.getFuncionRestricciones()
+                    .stream()
+                    .map(Termino::getVariable)
+                    .toList();
+
+            for (String var : todasVariables) {
+                if (!varsExistentes.contains(var)) {
+                    Termino cero = new Termino();
+                    cero.setVariable(var);
+                    cero.setCoeficiente(0.0);
+                    cero.setExponente(1.0);
+                    r.getFuncionRestricciones().add(cero);
+                }
+            }
+
+
+            // Ordenar los términos: primero variables originales, luego holguras
+            r.getFuncionRestricciones().sort((t1, t2) -> {
+                boolean t1EsHolgura = t1.getVariable().startsWith("S");
+                boolean t2EsHolgura = t2.getVariable().startsWith("S");
+
+                if (t1EsHolgura && !t2EsHolgura) return 1;   // holgura después
+                if (!t1EsHolgura && t2EsHolgura) return -1;  // original antes
+                return t1.getVariable().compareTo(t2.getVariable()); // mismo tipo: ordenar alfabéticamente
+            });
+        }
         return restricciones;
     }
+
 
     // Nos ubica en el cuadrante uno de los ejes de coordenadas
     public static List<String> restriccionNoNegatividad(List<Restriccion> restricciones) {
@@ -76,7 +119,9 @@ public class Restriccion {
         for (Restriccion restriccion : restricciones) {
             for (Termino termino : restriccion.getFuncionRestricciones()) {
                 String var = termino.getVariable();
-                if (!variables.contains(var)) {variables.add(var);}
+                if (!variables.contains(var)) {
+                    variables.add(var);
+                }
             }
         }
         return variables;
@@ -88,12 +133,18 @@ public class Restriccion {
         for (Restriccion r : restricciones) {
             if (r.getVld() < 0) {
                 // Multiplicar cada coeficiente por -1
-                for (Termino t : r.getFuncionRestricciones()) {t.setCoeficiente(t.getCoeficiente() * -1);}
+                for (Termino t : r.getFuncionRestricciones()) {
+                    t.setCoeficiente(t.getCoeficiente() * -1);
+                }
 
                 // Cambiar el operador si aplica
                 switch (r.getOperador()) {
-                    case menorIgual: r.setOperador(Operador.mayorIgual); break;
-                    case mayorIgual: r.setOperador(Operador.menorIgual); break;
+                    case menorIgual:
+                        r.setOperador(Operador.mayorIgual);
+                        break;
+                    case mayorIgual:
+                        r.setOperador(Operador.menorIgual);
+                        break;
                 }
                 // Hacer que el VLD sea positivo
                 r.setVld(-r.getVld());
