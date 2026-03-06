@@ -7,7 +7,7 @@ import { Tipo } from '../../models/domain/tipo';
 import { resolverProblemaPL } from '../../service/programacionLinealService';
 
 const LandingPage = () => {
-  //Evitar que se cargen vareiables que empiecen con S.
+  //Evitar que se cargen variables que empiecen con S.
   //Evitar que cargen con la holgera
 
   const [metodoTipo, setMetodoTipo] = useState<MetodoTipo>(MetodoTipo.Simplex);

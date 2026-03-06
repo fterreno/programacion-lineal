@@ -18,6 +18,9 @@ public class MatrizSimplex {
     private List<String> c_base; //variables base
     private List<Double> c_vld; //valores del lado derecho de la restriccion
 
+    private String variableEntrada;
+    private String variableSalida;
+
     public void calcularSolucionCoste() {
         // Calculamos Zj, el producto escalar de CB por las columnas de la matriz
         this.f_zj = productoEscalar(this.c_cb, this.m_restricciones);
@@ -73,6 +76,63 @@ public class MatrizSimplex {
             }
         }
     }
+
+    public void variableEntrada(Tipo tipo){
+        int posicion = -1;
+        double condicionEntrada = 0;
+        for (int i = 0; i < this.f_cjZj.size(); i++){
+            //Condicion de maximizacion para variable de entrada: entra a la base aquella mayor incremento positivo (cj-zj) > 0.
+            if ((tipo == Tipo.MAX) && (this.f_cjZj.get(i) > condicionEntrada)) {
+                condicionEntrada = this.f_cjZj.get(i);
+                posicion = i;
+            }
+            //Condicion de minimizacion para variable de entrada: entra a la base aquella mayor incremento negativo (cj-zj) < 0
+            if ((tipo == Tipo.MIN) && (this.f_cjZj.get(i) < condicionEntrada)) {
+                condicionEntrada = this.f_cjZj.get(i);
+                posicion = i;
+            }
+        }
+        if (posicion == -1) {
+            throw new IllegalArgumentException("La solución ya es óptima");
+        }
+
+        this.variableEntrada = this.f_etiqueta.get(posicion);
+    }
+
+    public void variableSalida(){
+        int columnaPivote = this.getF_etiqueta().indexOf(this.variableEntrada);
+        if (columnaPivote == -1){
+            throw new IllegalArgumentException("Error buscando la posicion de etiqueta en MatrizSimpplex.variableSalida");
+        }
+        List<Double> tita = new ArrayList<>();
+        for (int i = 0; i < this.c_vld.size(); i++) {
+            double denominador = this.m_restricciones[i][columnaPivote]; //valor de la columna restricciones de cada fila
+            if (denominador > 0) {  // solo filas con valor positivo por la regla
+                tita.add(this.c_vld.get(i) / denominador);
+            } else {
+                tita.add(0.0); // si el denominador <= 0, no se puede usar para la razón mínima
+            }
+        }
+
+        //Si todos tita son ≤ 0 la solución es no acotada.
+        if (tita.stream().allMatch(v -> v <= 0)) {
+            throw new IllegalStateException("La solución es no acotada");
+        }
+
+        // encontrar la fila pivote (índice del valor mínimo)
+        double titaMinimo = Double.POSITIVE_INFINITY;
+        int filaPivote = -1;
+
+        for (int i = 0; i < tita.size(); i++) {
+            if ( (0 < tita.get(i)) && (tita.get(i) < titaMinimo)) { // si el denominador <= 0, no se puede usar para la razón mínima
+                titaMinimo = tita.get(i);
+                filaPivote = i;
+            }
+        }
+        this.variableSalida = this.c_base.get(filaPivote);
+    }
+
+
 
 }
 //────────────────────────────────────────────────────────────────────
