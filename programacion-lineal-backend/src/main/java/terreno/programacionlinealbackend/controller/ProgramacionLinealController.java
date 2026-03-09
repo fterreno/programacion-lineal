@@ -6,8 +6,8 @@ import terreno.programacionlinealbackend.models.DTOs.SolicitudRespuesta;
 import terreno.programacionlinealbackend.strategy.*;
 
 @RestController
-@RequestMapping("/api/pl")
-@CrossOrigin(origins = "http://localhost:5173") // React (Vite)
+@RequestMapping("/api/pl") //mapeo de la url
+@CrossOrigin(origins = "http://localhost:5173") // React url del FrontEnd
 public class ProgramacionLinealController {
 
     private final MetodoSimplex metodoSimplex;

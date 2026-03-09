@@ -11,6 +11,13 @@ public class Restriccion {
     private Operador operador;          // "<=", ">=", "=", "<", ">"
     private double vld;         // Valores del Lado Derecho de la ecuación. Límite inferior, por ejemplo 200
 
+    //Creo un constructor de la clase
+    public Restriccion(List<Termino> funcionRestricciones, Operador operador, double vld) {
+        this.funcionRestricciones = funcionRestricciones;
+        this.operador = operador;
+        this.vld = vld;
+    }
+
     public void validar() {
         // Verificar límite válido
         if (Double.isNaN(vld)) {
@@ -47,11 +54,7 @@ public class Restriccion {
 
         double coeficiente = (operador == Operador.menorIgual || operador == Operador.menor) ? 1.0 : -1.0;
 
-        Termino holgura = new Termino();
-        holgura.setVariable(nombreVariable);
-        holgura.setExponente(1.0);
-        holgura.setCoeficiente(coeficiente);
-
+        Termino holgura = new Termino(coeficiente, nombreVariable, 1.0);
         this.funcionRestricciones.add(holgura);
     }
 
@@ -61,10 +64,7 @@ public class Restriccion {
                 .anyMatch(t -> t.getVariable().equals(nombreVariable));
 
         if (!existe) {
-            Termino cero = new Termino();
-            cero.setVariable(nombreVariable);
-            cero.setCoeficiente(0.0);
-            cero.setExponente(1.0);
+            Termino cero = new Termino(0.0, nombreVariable, 1.0);
             this.funcionRestricciones.add(cero);
         }
     }
@@ -91,20 +91,6 @@ public class Restriccion {
         else if (operador == Operador.mayorIgual) operador = Operador.menorIgual;
         else if (operador == Operador.menor) operador = Operador.mayor;
         else if (operador == Operador.mayor) operador = Operador.menor;
-    }
-
-    // Nos ubica en el cuadrante uno de los ejes de coordenadas
-    public static List<String> restriccionNoNegatividad(List<Restriccion> restricciones) {
-        List<String> variables = new ArrayList<>();
-        for (Restriccion restriccion : restricciones) {
-            for (Termino termino : restriccion.getFuncionRestricciones()) {
-                String var = termino.getVariable();
-                if (!variables.contains(var)) {
-                    variables.add(var);
-                }
-            }
-        }
-        return variables;
     }
 
     public String obtenerBase() {

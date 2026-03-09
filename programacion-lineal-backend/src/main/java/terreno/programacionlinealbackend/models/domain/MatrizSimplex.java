@@ -21,6 +21,21 @@ public class MatrizSimplex {
     private String variableEntrada;
     private String variableSalida;
 
+    //Constructor de la clase MatrizSimplex
+    public MatrizSimplex(List<Double> f_cj, List<String> f_etiqueta,  double[][] m_restricciones, List<Double> f_zj, List<Double> f_cjZj, List<Double> c_cb,
+                         List<String> c_base, List<Double> c_vld, String variableEntrada, String variableSalida){
+        this.f_cj = f_cj;
+        this.f_etiqueta = f_etiqueta;
+        this. m_restricciones = m_restricciones;
+        this.f_zj = f_zj;
+        this.f_cjZj = f_cjZj;
+        this.c_cb = c_cb;
+        this.c_base = c_base;
+        this.c_vld = c_vld;
+        this.variableEntrada = variableEntrada;
+        this.variableSalida = variableSalida;
+    }
+
     public void calcularSolucionCoste() {
         // Calculamos Zj, el producto escalar de CB por las columnas de la matriz
         this.f_zj = productoEscalar(this.c_cb, this.m_restricciones);

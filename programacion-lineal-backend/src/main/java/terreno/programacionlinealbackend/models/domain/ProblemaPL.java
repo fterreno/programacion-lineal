@@ -14,6 +14,7 @@ public class ProblemaPL {
     public void validar() {
         funcionObjetivo.validar();
         restricciones.forEach(r -> r.validar());
+        this.verificarVariables();
     }
 
     //Se agregan las variables de holgura
@@ -30,6 +31,9 @@ public class ProblemaPL {
                 r.variablesHolgura(nombreS);
                 nombresHolgura.add(nombreS);
                 nro++;
+            }
+            else{
+                throw new IllegalArgumentException("Las restricciones no pueden tener una igualdad. Para ello deberá utilizarse un variable artificial");
             }
         }
 
@@ -60,55 +64,55 @@ public class ProblemaPL {
     }
 
     // Me impiden salir del cuadarante positivo del eje cartesiano
-    //todo REVISAR porque no se en donde se utiliza
-    public void agregarVariablesNoNegatividad() { //todo REVISAR
-        Restriccion.restriccionNoNegatividad(this.restricciones);
+    public void agregarRestriccionesNoNegatividad() {
+        Set<String> variables = obtenerTodasLasVariables();
+        for (String var : variables) {
+            boolean yaExiste = false;
+            // Verificar si ya existen las restricciones de no negatividad Xi >= 0
+            for (Restriccion r : restricciones) {
+                if (r.getOperador() == Operador.mayorIgual &&
+                        r.getVld() == 0 &&
+                        r.getFuncionRestricciones().size() == 1) {
+                    Termino t = r.getFuncionRestricciones().get(0);
+                    if (t.getVariable().equals(var) && t.getCoeficiente() == 1) {
+                        yaExiste = true;
+                        break;
+                    }
+                }
+            }
+            // Solo agregar las variables de no negatividad si no existen
+            if (!yaExiste) {
+                Termino termino = new Termino(1, var, 1);
+                List<Termino> lista = new ArrayList<>();
+                lista.add(termino);
+                Restriccion restriccionNoNeg = new Restriccion(lista, Operador.mayorIgual, 0);
+                restricciones.add(restriccionNoNeg);
+            }
+        }
     }
 
     //Todas las variables de la funcion objetivo se deben encontrar en el conjunto de restriccciones
-    public boolean verificarVariables(ProblemaPL problema) {
-        // Conjunto de variables presentes en las restricciones
+    private void verificarVariables() {
         Set<String> variablesRestricciones = new HashSet<>();
-        for (Restriccion restriccion : problema.getRestricciones()) {
-            for (Termino termino : restriccion.getFuncionRestricciones()) {
-                variablesRestricciones.add(termino.getVariable());
+        for (Restriccion r : this.getRestricciones()) {
+            r.getFuncionRestricciones().forEach(t -> variablesRestricciones.add(t.getVariable()));
+        }
+        for (Termino t : this.getFuncionObjetivo().getTermino()) {
+            if (!variablesRestricciones.contains(t.getVariable())) {
+                throw new IllegalArgumentException("No todas las variables de la funcion objetivo se encuentran en el conjunto restricciones.");
             }
         }
-        // Verificar que todas las variables de la función objetivo estén en las restricciones
-        for (Termino terminoFObj : problema.getFuncionObjetivo().getTermino()) {
-            if (!variablesRestricciones.contains(terminoFObj.getVariable())) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public void generarMatrizInicial() {
-        MatrizSimplex matriz = new MatrizSimplex();
-
         // Definir etiquetas, los nombres de las variables (originales + holguras)
         List<String> etiquetas = new ArrayList<>();
         funcionObjetivo.getTermino().forEach(t -> etiquetas.add(t.getVariable()));
-        matriz.setF_etiqueta(etiquetas);
-
-        // Definir los coeficientes Cj desde la FuncionObjetivo
-        matriz.setF_cj(this.funcionObjetivo.obtenerCj(etiquetas));
+        List<Double> cj = funcionObjetivo.obtenerCj(etiquetas);
 
         // Cargar la matriz de las filas desde las Restricciones
-        configurarMatrizRestricciones(matriz, etiquetas);
-
-        // El objeto MatrizSimplex se autocompleta
-        matriz.calcularSolucionCoste();
-        matriz.verificarVectoresUnitarios();
-
-        if (this.iteraciones == null) this.iteraciones = new ArrayList<>();
-        this.iteraciones.add(matriz);
-    }
-
-    private void configurarMatrizRestricciones(MatrizSimplex matriz, List<String> etiquetas) {
         int n = restricciones.size();
         int m = etiquetas.size();
-
         double[][] coeficientes = new double[n][m];
         List<String> base = new ArrayList<>();
         List<Double> cb = new ArrayList<>();
@@ -130,10 +134,13 @@ public class ProblemaPL {
             cb.add(this.funcionObjetivo.obtenerCoeficienteDe(varBase));
         }
 
-        matriz.setM_restricciones(coeficientes);
-        matriz.setC_base(base);
-        matriz.setC_cb(cb);
-        matriz.setC_vld(vld);
+        MatrizSimplex matrizInicial = new MatrizSimplex(cj, etiquetas, coeficientes, null, null, cb, base, vld, null, null);
+        // El objeto MatrizSimplex se autocompleta
+        matrizInicial.calcularSolucionCoste();
+        matrizInicial.verificarVectoresUnitarios();
+
+        if (this.iteraciones == null) this.iteraciones = new ArrayList<>();
+        this.iteraciones.add(matrizInicial);
     }
 
     public void variableEntrada() {
@@ -146,7 +153,6 @@ public class ProblemaPL {
 
     public void actualizarMatriz() {
         MatrizSimplex ultima = this.getIteraciones().get(this.getIteraciones().size() - 1);
-        MatrizSimplex matrizNueva = new MatrizSimplex();
 
         // Copiar f_cj y etiquetas y c_cb y c_base y c_vld
         List<Double> nuevoFCj = new ArrayList<>(ultima.getF_cj());
@@ -186,15 +192,9 @@ public class ProblemaPL {
         }
 
         // Setear los valores de la nueva matriz
-        matrizNueva.setF_cj(nuevoFCj);
-        matrizNueva.setF_etiqueta(nuevoFEtiqueta);
-        matrizNueva.setC_base(nuevoCBase);
-        matrizNueva.setC_vld(nuevoC_vld);
-        matrizNueva.setM_restricciones(nuevaMatriz);
-        matrizNueva.setC_cb(nuevoCCb);
-        matrizNueva.calcularSolucionCoste();
-
-        this.getIteraciones().add(matrizNueva);
+        MatrizSimplex matrizSimplexNueva = new MatrizSimplex(nuevoFCj, nuevoFEtiqueta, nuevaMatriz, null, null,  nuevoCCb, nuevoCBase, nuevoC_vld, null, null);
+        matrizSimplexNueva.calcularSolucionCoste();
+        this.getIteraciones().add(matrizSimplexNueva);
     }
 
     public int calcularFilaPivote(int columnaPivote, double[][] m_restricciones, List<Double> c_vld) {

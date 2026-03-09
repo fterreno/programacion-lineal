@@ -22,9 +22,8 @@ public class MetodoSimplex implements MetodosPL {
 
     public void primeraFase(ProblemaPL problema){
         problema.agregarVariablesHolgura(); // Convertir el modelo a su forma estándar.
-        problema.agregarVariablesNoNegatividad();
-        // Corroborar que tenga m vectores unitarios, si existe una igualdad se utiliza una variable artificial
-        problema.generarMatrizInicial();
+        problema.agregarRestriccionesNoNegatividad();
+        problema.generarMatrizInicial(); // Corroborar que tenga m vectores unitarios, si existe una igualdad se utiliza una variable artificial
     }
 
     public void segundaFase(ProblemaPL problema){
@@ -32,7 +31,6 @@ public class MetodoSimplex implements MetodosPL {
         problema.variableEntrada();
         problema.variableSalida();
         problema.actualizarMatriz();
-        //cada vez que se hace el pivoteo tener en cuenta que no se pasa de las restricciones no limitantes!!!
 
     }
 
