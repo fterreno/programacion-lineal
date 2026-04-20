@@ -31,7 +31,7 @@ public class FuncionObjetivo {
         if (this.termino == null) {
             this.termino = new ArrayList<>();
         }
-        for (String nombre : nombresHolgura) {
+        for (String nombre : nombres_holgura) {
             boolean existe = this.termino.stream().anyMatch(t -> t.getVariable().equals(nombre));
             if (!existe) {
                 Termino holgura = new Termino(0.0, nombre, 1.0);
@@ -41,9 +41,9 @@ public class FuncionObjetivo {
     }
 
     public List<Double> obtenerCj(List<String> etiquetas) {
-        List<Double> f_cj = new ArrayList<>();
-        for (String var : etiquetas) {f_cj.add(obtenerCoeficienteDe(var));}
-        return f_cj;
+        List<Double> fila_cj = new ArrayList<>();
+        for (String var : etiquetas) { fila_cj.add(obtenerCoeficienteDe(var)); }
+        return fila_cj;
     }
 
     // FuncionObjetivo es la única que sabe cuánto vale una variable.
@@ -52,7 +52,6 @@ public class FuncionObjetivo {
                 .filter(t -> t.getVariable().equals(variable))
                 .findFirst()
                 .map(Termino::getCoeficiente)
-                .orElseThrow(() ->new IllegalArgumentException("La variable '" + variable + "' no existe en la función objetivo")
-                );
+                .orElseThrow(() -> new IllegalArgumentException("La variable '" + variable + "' no existe en la función objetivo"));
     }
 }

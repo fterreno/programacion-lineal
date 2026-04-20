@@ -6,41 +6,43 @@ import java.util.List;
 
 @Data
 public class MatrizSimplex {
-    private List<Double> f_cj; // Fila de coeficientes de la función objetivo
-    private List<String> f_etiqueta; // Nombre de las columnas
+    private List<Double> fila_cj; // Fila de coeficientes de la función objetivo
+    private List<String> fila_etiqueta; // Nombre de las columnas
 
-    private double[][] m_restricciones; // Matriz de restricciones (ej 5,5,1,0,0)
+    private double[][] matriz_restricciones; // Matriz de restricciones (ej 5,5,1,0,0)
 
-    private List<Double> f_zj;  // Fila Zj
-    private List<Double> f_cjZj; // Fila Cj - Zj
+    private List<Double> fila_zj; // Fila Zj
+    private List<Double> fila_cj_zj; // Fila Cj - Zj
 
-    private List<Double> c_cb; // Coeficiente de las variables base
-    private List<String> c_base; //variables base
-    private List<Double> c_vld; //valores del lado derecho de la restriccion
+    private List<Double> columna_cb; // Coeficiente de las variables base
+    private List<String> columna_base; //variables base
+    private List<Double> columna_vld; //valores del lado derecho de la restriccion
 
-    private String variableEntrada;
-    private String variableSalida;
+    private String variable_entrada;
+    private String variable_salida;
 
     //Constructor de la clase MatrizSimplex
-    public MatrizSimplex(List<Double> f_cj, List<String> f_etiqueta,  double[][] m_restricciones, List<Double> f_zj, List<Double> f_cjZj, List<Double> c_cb,
-                         List<String> c_base, List<Double> c_vld, String variableEntrada, String variableSalida){
-        this.f_cj = f_cj;
-        this.f_etiqueta = f_etiqueta;
-        this. m_restricciones = m_restricciones;
-        this.f_zj = f_zj;
-        this.f_cjZj = f_cjZj;
-        this.c_cb = c_cb;
-        this.c_base = c_base;
-        this.c_vld = c_vld;
-        this.variableEntrada = variableEntrada;
-        this.variableSalida = variableSalida;
+    public MatrizSimplex(List<Double> fila_cj, List<String> fila_etiqueta, double[][] matriz_restricciones,
+                         List<Double> fila_zj, List<Double> fila_cj_zj, List<Double> columna_cb,
+                         List<String> columna_base, List<Double> columna_vld,
+                         String variable_entrada, String variable_salida) {
+        this.fila_cj = fila_cj;
+        this.fila_etiqueta = fila_etiqueta;
+        this.matriz_restricciones = matriz_restricciones;
+        this.fila_zj = fila_zj;
+        this.fila_cj_zj = fila_cj_zj;
+        this.columna_cb = columna_cb;
+        this.columna_base = columna_base;
+        this.columna_vld = columna_vld;
+        this.variable_entrada = variable_entrada;
+        this.variable_salida = variable_salida;
     }
 
     public void calcularSolucionCoste() {
         // Calculamos Zj, el producto escalar de CB por las columnas de la matriz
-        this.f_zj = productoEscalar(this.c_cb, this.m_restricciones);
+        this.fila_zj = productoEscalar(this.columna_cb, this.matriz_restricciones);
         // Calculamos Cj - Zj, la diferencia para el criterio de optimilidad
-        this.f_cjZj = calcularCjZj();
+        this.fila_cj_zj = calcularCjZj();
     }
 
     public static List<Double> productoEscalar(List<Double> a, double[][] B) {
@@ -64,25 +66,25 @@ public class MatrizSimplex {
 
     private List<Double> calcularCjZj() {
         List<Double> resultado = new ArrayList<>();
-        for (int i = 0; i < f_cj.size(); i++) {
-            resultado.add(f_cj.get(i) - f_zj.get(i));
+        for (int i = 0; i < fila_cj.size(); i++) {
+            resultado.add(fila_cj.get(i) - fila_zj.get(i));
         }
         return resultado;
     }
 
     public void verificarVectoresUnitarios() {
-        List<String> base = this.getC_base();
-        double[][] m = this.getM_restricciones();
+        List<String> base = this.getColumna_base();
+        double[][] m = this.getMatriz_restricciones();
 
         for (int i = 0; i < base.size(); i++) {
-            String varBase = base.get(i);
-            int colIndex = this.getF_etiqueta().indexOf(varBase);
-            if (colIndex == -1) {
+            String var_base = base.get(i);
+            int indice_columna = this.getFila_etiqueta().indexOf(var_base);
+            if (indice_columna == -1) {
                 throw new IllegalArgumentException("No posee vectores unitarios, utilizar variable artificial");
             }
 
             for (int fila = 0; fila < m.length; fila++) {
-                double valor = m[fila][colIndex];
+                double valor = m[fila][indice_columna];
                 if (fila == i) {
                     if (valor != 1.0) throw new IllegalArgumentException("No posee vectores unitarios, utilizar variable artificial");
                 } else {
@@ -92,18 +94,16 @@ public class MatrizSimplex {
         }
     }
 
-    public void variableEntrada(Tipo tipo){
+    public void variableEntrada(Tipo tipo) {
         int posicion = -1;
-        double condicionEntrada = 0;
-        for (int i = 0; i < this.f_cjZj.size(); i++){
-            //Condicion de maximizacion para variable de entrada: entra a la base aquella mayor incremento positivo (cj-zj) > 0.
-            if ((tipo == Tipo.MAX) && (this.f_cjZj.get(i) > condicionEntrada)) {
-                condicionEntrada = this.f_cjZj.get(i);
+        double condicion_entrada = 0;
+        for (int i = 0; i < this.fila_cj_zj.size(); i++) {
+            if ((tipo == Tipo.MAX) && (this.fila_cj_zj.get(i) > condicion_entrada)) {
+                condicion_entrada = this.fila_cj_zj.get(i);
                 posicion = i;
             }
-            //Condicion de minimizacion para variable de entrada: entra a la base aquella mayor incremento negativo (cj-zj) < 0
-            if ((tipo == Tipo.MIN) && (this.f_cjZj.get(i) < condicionEntrada)) {
-                condicionEntrada = this.f_cjZj.get(i);
+            if ((tipo == Tipo.MIN) && (this.fila_cj_zj.get(i) < condicion_entrada)) {
+                condicion_entrada = this.fila_cj_zj.get(i);
                 posicion = i;
             }
         }
@@ -111,45 +111,42 @@ public class MatrizSimplex {
             throw new IllegalArgumentException("La solución ya es óptima");
         }
 
-        this.variableEntrada = this.f_etiqueta.get(posicion);
+        this.variable_entrada = this.fila_etiqueta.get(posicion);
     }
 
-    public void variableSalida(){
-        int columnaPivote = this.getF_etiqueta().indexOf(this.variableEntrada);
-        if (columnaPivote == -1){
-            throw new IllegalArgumentException("Error buscando la posicion de etiqueta en MatrizSimpplex.variableSalida");
+    public void variableSalida() {
+        int columna_pivote = this.getFila_etiqueta().indexOf(this.variable_entrada);
+        if (columna_pivote == -1) {
+            throw new IllegalArgumentException("Error buscando la posicion de etiqueta en MatrizSimplex.variableSalida");
         }
         List<Double> tita = new ArrayList<>();
-        for (int i = 0; i < this.c_vld.size(); i++) {
-            double denominador = this.m_restricciones[i][columnaPivote]; //valor de la columna restricciones de cada fila
-            if (denominador > 0) {  // solo filas con valor positivo por la regla
-                tita.add(this.c_vld.get(i) / denominador);
+        for (int i = 0; i < this.columna_vld.size(); i++) {
+            double denominador = this.matriz_restricciones[i][columna_pivote];
+            if (denominador > 0) {
+                tita.add(this.columna_vld.get(i) / denominador);
             } else {
-                tita.add(0.0); // si el denominador <= 0, no se puede usar para la razón mínima
+                tita.add(0.0);
             }
         }
 
-        //Si todos tita son ≤ 0 la solución es no acotada.
         if (tita.stream().allMatch(v -> v <= 0)) {
             throw new IllegalStateException("La solución es no acotada");
         }
 
-        // encontrar la fila pivote (índice del valor mínimo)
-        double titaMinimo = Double.POSITIVE_INFINITY;
-        int filaPivote = -1;
+        double tita_minimo = Double.POSITIVE_INFINITY;
+        int fila_pivote = -1;
 
         for (int i = 0; i < tita.size(); i++) {
-            if ( (0 < tita.get(i)) && (tita.get(i) < titaMinimo)) { // si el denominador <= 0, no se puede usar para la razón mínima
-                titaMinimo = tita.get(i);
-                filaPivote = i;
+            if ((0 < tita.get(i)) && (tita.get(i) < tita_minimo)) {
+                tita_minimo = tita.get(i);
+                fila_pivote = i;
             }
         }
-        this.variableSalida = this.c_base.get(filaPivote);
+        this.variable_salida = this.columna_base.get(fila_pivote);
     }
 
-
-
 }
+
 //────────────────────────────────────────────────────────────────────
 //        |      |        |   8    |    6   |    0   |   0    |   0     //f_cj
 //────────────────────────────────────────────────────────────────────

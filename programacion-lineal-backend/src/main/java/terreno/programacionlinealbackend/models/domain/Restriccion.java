@@ -7,35 +7,30 @@ import java.util.List;
 
 @Data
 public class Restriccion {
-    private List<Termino> funcionRestricciones;    // Matriz de restricciones, vlizquierdo
-    private Operador operador;          // "<=", ">=", "=", "<", ">"
-    private double vld;         // Valores del Lado Derecho de la ecuación. Límite inferior, por ejemplo 200
+    private List<Termino> funcion_restricciones;  // Matriz de restricciones, vlizquierdo
+    private Operador operador; // "<=", ">=", "=", "<", ">"
+    private double valor_lado_derecho; // Valores del Lado Derecho de la ecuación. Límite inferior, por ejemplo 200
 
-    //Creo un constructor de la clase
-    public Restriccion(List<Termino> funcionRestricciones, Operador operador, double vld) {
-        this.funcionRestricciones = funcionRestricciones;
+    public Restriccion(List<Termino> funcion_restricciones, Operador operador, double valor_lado_derecho) {
+        this.funcion_restricciones = funcion_restricciones;
         this.operador = operador;
-        this.vld = vld;
+        this.valor_lado_derecho = valor_lado_derecho;
     }
 
     public void validar() {
-        // Verificar límite válido
-        if (Double.isNaN(vld)) {
-            throw new IllegalArgumentException("El límite de la restricción no es válido: " + vld);
+        if (Double.isNaN(valor_lado_derecho)) { // Verificar límite válido
+            throw new IllegalArgumentException("El límite de la restricción no es válido: " + valor_lado_derecho);
         }
 
-        // Verificar operador no nulo
-        if (operador == null) {
+        if (operador == null) { // Verificar operador no nulo
             throw new IllegalArgumentException("El operador de la restricción no puede ser nulo.");
         }
 
-        // Verificar términos
-        if (funcionRestricciones == null || funcionRestricciones.isEmpty()) {
+        if (funcion_restricciones == null || funcion_restricciones.isEmpty()) { // Verificar términos
             throw new IllegalArgumentException("La restricción debe tener al menos un término.");
         }
 
-        // Validar cada término de la funcionRestricciones
-        for (Termino t : funcionRestricciones) {
+        for (Termino t : funcion_restricciones) { // Validar cada término de la funcionRestricciones
             if (Double.isNaN(t.getCoeficiente())) {
                 throw new IllegalArgumentException("Coeficiente inválido en un término de la restricción: " + t);
             }
@@ -49,52 +44,52 @@ public class Restriccion {
     }
 
     // Agrega las holguras o excesos correspondientes
-    public void variablesHolgura(String nombreVariable) {
-        if (this.operador == Operador.igual) return;
+    public void variablesHolgura(String nombre_variable) {
+        if (this.operador == Operador.IGUAL) return;
 
-        double coeficiente = (operador == Operador.menorIgual || operador == Operador.menor) ? 1.0 : -1.0;
+        double coeficiente = (operador == Operador.MENOR_IGUAL || operador == Operador.MENOR) ? 1.0 : -1.0;
 
-        Termino holgura = new Termino(coeficiente, nombreVariable, 1.0);
-        this.funcionRestricciones.add(holgura);
+        Termino holgura = new Termino(coeficiente, nombre_variable, 1.0);
+        this.funcion_restricciones.add(holgura);
     }
 
     // Asegura que se encuentren todas las variables (misma cantidad) para la matriz
-    public void asegurarVariable(String nombreVariable) {
-        boolean existe = funcionRestricciones.stream()
-                .anyMatch(t -> t.getVariable().equals(nombreVariable));
+    public void asegurarVariable(String nombre_variable) {
+        boolean existe = funcion_restricciones.stream()
+                .anyMatch(t -> t.getVariable().equals(nombre_variable));
 
         if (!existe) {
-            Termino cero = new Termino(0.0, nombreVariable, 1.0);
-            this.funcionRestricciones.add(cero);
+            Termino cero = new Termino(0.0, nombre_variable, 1.0);
+            this.funcion_restricciones.add(cero);
         }
     }
 
     // Ordena los terminos primero las variables y luego variebles holgura/excesos
     public void ordenarTerminos(Comparator<Termino> comparador) {
-        this.funcionRestricciones.sort(comparador);
+        this.funcion_restricciones.sort(comparador);
     }
 
     // En el caso de que en el vector del lado derecho exista algún valor negativo deberán multiplicarse ambos miembros de la restricción por -1.
     public void normalizarVld() {
-        if (this.vld < 0) {
-            for (Termino t : this.funcionRestricciones) {
+        if (this.valor_lado_derecho < 0) {
+            for (Termino t : this.funcion_restricciones) {
                 t.setCoeficiente(t.getCoeficiente() * -1);
             }
             invertirOperador();
-            this.vld = -this.vld;
+            this.valor_lado_derecho = -this.valor_lado_derecho;
         }
     }
 
     // En el caso de que en el vector del lado derecho exista algún valor negativo deberán multiplicarse ambos miembros de la restricción por -1.
     private void invertirOperador() {
-        if (operador == Operador.menorIgual) operador = Operador.mayorIgual;
-        else if (operador == Operador.mayorIgual) operador = Operador.menorIgual;
-        else if (operador == Operador.menor) operador = Operador.mayor;
-        else if (operador == Operador.mayor) operador = Operador.menor;
+        if (operador == Operador.MENOR_IGUAL) operador = Operador.MAYOR_IGUAL;
+        else if (operador == Operador.MAYOR_IGUAL) operador = Operador.MENOR_IGUAL;
+        else if (operador == Operador.MENOR) operador = Operador.MAYOR;
+        else if (operador == Operador.MAYOR) operador = Operador.MENOR;
     }
 
     public String obtenerBase() {
-        return this.funcionRestricciones.stream()
+        return this.funcion_restricciones.stream()
                 .filter(t -> t.getVariable().startsWith("S") && t.getCoeficiente() == 1.0)
                 .map(Termino::getVariable)
                 .findFirst()

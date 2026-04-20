@@ -6,5 +6,5 @@ import terreno.programacionlinealbackend.models.domain.ProblemaPL;
 @Data
 public class SolicitudRespuesta {
     public String mensaje;
-    public ProblemaPL problemaSolucionado;
+    public ProblemaPL problema_solucionado;
 }
