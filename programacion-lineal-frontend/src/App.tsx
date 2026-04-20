@@ -1,27 +1,27 @@
 import { useState } from 'react';
-import LandingPage from './boundaries/landingPage/landingPage';
-import SolutionPage from './boundaries/solutionPage/solutionPage';
-import type { SolicitudRespuesta } from './models/DTOs/solicitudRespuesta';
+import LandingPage from './boundaries/landingPage/LandingPage';
+import SolutionPage from './boundaries/solutionPage/SolutionPage';
+import type { SolicitudRespuesta } from './models/dtos/SolicitudRespuesta';
 
-type PageState =
-  | { page: 'landing' }
-  | { page: 'solution'; respuesta: SolicitudRespuesta };
+type EstadoPagina =
+  | { pagina: 'inicio' }
+  | { pagina: 'solucion'; respuesta: SolicitudRespuesta };
 
 function App() {
-  const [pageState, setPageState] = useState<PageState>({ page: 'landing' });
+  const [estado_pagina, setEstadoPagina] = useState<EstadoPagina>({ pagina: 'inicio' });
 
-  if (pageState.page === 'solution') {
+  if (estado_pagina.pagina === 'solucion') {
     return (
       <SolutionPage
-        respuesta={pageState.respuesta}
-        onVolver={() => setPageState({ page: 'landing' })}
+        respuesta={estado_pagina.respuesta}
+        al_volver={() => setEstadoPagina({ pagina: 'inicio' })}
       />
     );
   }
 
   return (
     <LandingPage
-      onSolucionar={(respuesta) => setPageState({ page: 'solution', respuesta })}
+      al_solucionar={(respuesta) => setEstadoPagina({ pagina: 'solucion', respuesta })}
     />
   );
 }

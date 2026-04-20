@@ -1,31 +1,26 @@
 import axios from 'axios';
-import type { Termino } from '../models/domain/termino';
-import type { Restriccion } from '../models/domain/restriccion';
-import type { SolicitudProblema } from '../models/DTOs/solicitudProblema';
-import type { SolicitudRespuesta } from '../models/DTOs/solicitudRespuesta';
-import type { Tipo } from '../models/domain/tipo';
-import type { FuncionObjetivo } from '../models/domain/funcionObjetivo';
-import type { MetodoTipo } from '../models/domain/metodoTipo';
-import { operadorMappeo } from '../models/domain/operador';
+import type { Termino } from '../models/domain/Termino';
+import type { Restriccion } from '../models/domain/Restriccion';
+import type { SolicitudProblema } from '../models/dtos/SolicitudProblema';
+import type { SolicitudRespuesta } from '../models/dtos/SolicitudRespuesta';
+import type { Tipo } from '../models/domain/Tipo';
+import type { FuncionObjetivo } from '../models/domain/FuncionObjetivo';
+import type { MetodoTipo } from '../models/domain/MetodoTipo';
+import { mapeo_operador } from '../models/domain/Operador';
 
-const API_URL = 'http://localhost:8080/api/pl';
+const URL_API = 'http://localhost:8080/api/pl';
 
-// -------------------- PARSERS --------------------
-
-// Parsear función objetivo a FuncionObjetivo
-const convertirTermino = (terminos_string: string): Termino[] => {
+const ConvertirTermino = (terminos_string: string): Termino[] => {
   const terminos: Termino[] = [];
 
-  // Sin espacios y aseguramos que cada término tenga explícitamente un signo. Luego divide cada termino en un array
   const terminos_array = terminos_string.replace(/\s+/g, "").split(/(?=[+-])/);
   const expresion_regular = /^([+-]?\d*\.?\d*)?([a-zA-Z]\d*)?(?:\^(\d+))?$/;
-  
+
   terminos_array.forEach((elemento) => {
     const termino_seccion = elemento.match(expresion_regular);
     if (termino_seccion) {
       let [, coeficiente_str, variable, exponente_str] = termino_seccion;
-      
-      // Determinar coeficiente
+
       let coeficiente: number;
       if (!coeficiente_str || coeficiente_str === '+' || coeficiente_str === '-') {
         coeficiente = coeficiente_str === '-' ? -1 : 1;
@@ -36,7 +31,6 @@ const convertirTermino = (terminos_string: string): Termino[] => {
         }
       }
 
-      // Determinar exponente
       const exponente = variable ? (exponente_str ? parseInt(exponente_str) : 1) : 0;
 
       terminos.push({
@@ -49,17 +43,15 @@ const convertirTermino = (terminos_string: string): Termino[] => {
   return terminos;
 };
 
-const convertirRestricciones = (restriccion_string: string): Restriccion[] => {
+const ConvertirRestricciones = (restriccion_string: string): Restriccion[] => {
   const restricciones: Restriccion[] = [];
 
   restriccion_string.split('\n').forEach((linea_str) => {
     if (!linea_str.trim()) return;
 
-    // Normalizar operadores alternativos
-    let linea = linea_str.replace(/\s+/g, ""); // quitar espacios
+    let linea = linea_str.replace(/\s+/g, "");
     linea = linea.replace("=>", ">=").replace("=<", "<=");
 
-    // Detecta operador
     const operador_expresion = linea.match(/^(.+?)(<=|>=|=|<|>|=<|=>)(.+)$/);
     if (!operador_expresion) {
       throw new Error(`Restricción ignorada, formato inválido.`);
@@ -67,56 +59,52 @@ const convertirRestricciones = (restriccion_string: string): Restriccion[] => {
 
     let [, lado_izquierdo, operador_str, lado_derecho] = operador_expresion;
 
-    const operador_normalizado = operadorMappeo[operador_str];
+    const operador_normalizado = mapeo_operador[operador_str];
     if (!operador_normalizado) throw new Error(`Restricción ignorada, operador inválido.`);
-    
-    // Convertir lado derecho a número (acepta negativos)
+
     const lado_derecho_float = parseFloat(lado_derecho);
     if (isNaN(lado_derecho_float)) {
       throw new Error(`Restricción ignorada, lado derecho inválido.`);
     }
 
     restricciones.push({
-      vld: lado_derecho_float,
+      valor_lado_derecho: lado_derecho_float,
       operador: operador_normalizado,
-      funcionRestricciones: convertirTermino(lado_izquierdo),
+      funcion_restricciones: ConvertirTermino(lado_izquierdo),
     });
   });
 
   return restricciones;
 };
 
-// -------------------- SERVICE --------------------
-
-export const resolverProblemaPL = async (
+export const ResolverProblemaPL = async (
   funcion_str: string,
   restricciones_str: string,
-  metodoTipo: MetodoTipo,
+  metodo_tipo: MetodoTipo,
   tipo: Tipo
 ): Promise<SolicitudRespuesta> => {
   if (!funcion_str.trim()) throw new Error('Función objetivo vacía');
   if (!restricciones_str.trim()) throw new Error('Restriccion vacía');
 
-  const funcion: FuncionObjetivo = {
+  const funcion_objetivo: FuncionObjetivo = {
     tipo: tipo,
-    termino: convertirTermino(funcion_str)
-  }
+    termino: ConvertirTermino(funcion_str),
+  };
 
   const solicitud: SolicitudProblema = {
-    metodoTipo: metodoTipo,
+    metodo_tipo: metodo_tipo,
     problema: {
-      funcionObjetivo: funcion,
-      restricciones: convertirRestricciones(restricciones_str),
+      funcion_objetivo: funcion_objetivo,
+      restricciones: ConvertirRestricciones(restricciones_str),
     },
   };
 
   try {
-    const response = await axios.post(`${API_URL}/resolver`, solicitud, {
+    const respuesta = await axios.post(`${URL_API}/resolver`, solicitud, {
       headers: { 'Content-Type': 'application/json' },
     });
-    return response.data;
+    return respuesta.data;
   } catch (error: any) {
     throw new Error(`No se pudo resolver el problema: ${error.message || error}`);
   }
-  
 };
