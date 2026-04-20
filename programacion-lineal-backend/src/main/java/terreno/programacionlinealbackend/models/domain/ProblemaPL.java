@@ -63,34 +63,6 @@ public class ProblemaPL {
         return vars;
     }
 
-    // Me impiden salir del cuadarante positivo del eje cartesiano
-    public void agregarRestriccionesNoNegatividad() {
-        Set<String> variables = obtenerTodasLasVariables();
-        for (String var : variables) {
-            boolean yaExiste = false;
-            // Verificar si ya existen las restricciones de no negatividad Xi >= 0
-            for (Restriccion r : restricciones) {
-                if (r.getOperador() == Operador.mayorIgual &&
-                        r.getVld() == 0 &&
-                        r.getFuncionRestricciones().size() == 1) {
-                    Termino t = r.getFuncionRestricciones().get(0);
-                    if (t.getVariable().equals(var) && t.getCoeficiente() == 1) {
-                        yaExiste = true;
-                        break;
-                    }
-                }
-            }
-            // Solo agregar las variables de no negatividad si no existen
-            if (!yaExiste) {
-                Termino termino = new Termino(1, var, 1);
-                List<Termino> lista = new ArrayList<>();
-                lista.add(termino);
-                Restriccion restriccionNoNeg = new Restriccion(lista, Operador.mayorIgual, 0);
-                restricciones.add(restriccionNoNeg);
-            }
-        }
-    }
-
     //Todas las variables de la funcion objetivo se deben encontrar en el conjunto de restriccciones
     private void verificarVariables() {
         Set<String> variablesRestricciones = new HashSet<>();
