@@ -5,30 +5,41 @@ import { BlockMath } from 'react-katex';
 import { MetodoTipo } from '../../models/domain/metodoTipo';
 import { Tipo } from '../../models/domain/tipo';
 import { resolverProblemaPL } from '../../service/programacionLinealService';
+import type { SolicitudRespuesta } from '../../models/DTOs/solicitudRespuesta';
 
-const LandingPage = () => {
-  //Evitar que se cargen variables que empiecen con S.
-  //Evitar que cargen con la holgera
+interface LandingPageProps {
+  onSolucionar: (respuesta: SolicitudRespuesta) => void;
+}
 
+const LandingPage = ({ onSolucionar }: LandingPageProps) => {
   const [metodoTipo, setMetodoTipo] = useState<MetodoTipo>(MetodoTipo.Simplex);
   const [tipo, setTipo] = useState<Tipo>(Tipo.MAX);
-
   const [funcionObjetivo, setFunObj] = useState('');
   const [restricciones, setRestricciones] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(false);
 
   const handleSubmit = async () => {
+    console.log('[handleSubmit] click recibido');
+    setError(null);
+    setCargando(true);
     try {
-      await resolverProblemaPL(
+      console.log('[handleSubmit] llamando al backend...');
+      const respuesta = await resolverProblemaPL(
         funcionObjetivo,
         restricciones,
         metodoTipo,
         tipo
       );
-    } catch (error) {
-      console.error('No se pudo resolver el problema:', error);
+      console.log('[handleSubmit] respuesta recibida:', respuesta);
+      onSolucionar(respuesta);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error desconocido';
+      console.error('[handleSubmit] error:', msg);
+      setError(msg);
+    } finally {
+      setCargando(false);
     }
-
-
   };
 
   // Convierte función objetivo a lista de términos
@@ -129,8 +140,22 @@ const LandingPage = () => {
             </div>
           )}
 
-          <button className={styles.btnPrimary} onClick={handleSubmit}>
-            Calcular Solución Óptima
+          {error && (
+            <div style={{
+              marginTop: '1.2rem',
+              padding: '1rem 1.2rem',
+              borderRadius: '10px',
+              background: 'rgba(239,68,68,0.1)',
+              border: '1px solid rgba(239,68,68,0.3)',
+              color: '#fca5a5',
+              fontSize: '0.85rem',
+            }}>
+              <strong>Error:</strong> {error}
+            </div>
+          )}
+
+          <button className={styles.btnPrimary} onClick={handleSubmit} disabled={cargando}>
+            {cargando ? 'Calculando...' : 'Calcular Solución Óptima'}
           </button>
 
           <p className={styles.disclaimer}>

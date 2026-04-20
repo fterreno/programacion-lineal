@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { Termino } from '../models/domain/termino';
 import type { Restriccion } from '../models/domain/restriccion';
 import type { SolicitudProblema } from '../models/DTOs/solicitudProblema';
+import type { SolicitudRespuesta } from '../models/DTOs/solicitudRespuesta';
 import type { Tipo } from '../models/domain/tipo';
 import type { FuncionObjetivo } from '../models/domain/funcionObjetivo';
 import type { MetodoTipo } from '../models/domain/metodoTipo';
@@ -92,7 +93,7 @@ export const resolverProblemaPL = async (
   restricciones_str: string,
   metodoTipo: MetodoTipo,
   tipo: Tipo
-) => {
+): Promise<SolicitudRespuesta> => {
   if (!funcion_str.trim()) throw new Error('Función objetivo vacía');
   if (!restricciones_str.trim()) throw new Error('Restriccion vacía');
 

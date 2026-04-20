@@ -17,12 +17,12 @@ public class MetodoSimplex implements MetodosPL {
         }
         SolicitudRespuesta respuesta = new SolicitudRespuesta();
         respuesta.setMensaje("Método Simplex: " + problema);
+        respuesta.setProblemaSolucionado(problema);
         return respuesta;
     }
 
     public void primeraFase(ProblemaPL problema){
         problema.agregarVariablesHolgura(); // Convertir el modelo a su forma estándar.
-        problema.agregarRestriccionesNoNegatividad();
         problema.generarMatrizInicial(); // Corroborar que tenga m vectores unitarios, si existe una igualdad se utiliza una variable artificial
     }
 
