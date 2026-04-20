@@ -41,4 +41,3 @@ public class MetodoSimplex implements MetodosPL {
         }
         }
     }
-}

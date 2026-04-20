@@ -27,7 +27,7 @@ public class FuncionObjetivo {
     }
 
     // Agrega variables de holgura/exceso
-    public void variablesHolgura(List<String> nombresHolgura) {
+    public void variablesHolgura(List<String> nombres_holgura) {
         if (this.termino == null) {
             this.termino = new ArrayList<>();
         }
