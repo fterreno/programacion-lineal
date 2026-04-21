@@ -17,7 +17,7 @@ export class ErrorPL extends Error {
   }
 }
 
-const URL_API = 'http://localhost:8080/api/pl';
+const URL_API = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/pl';
 
 const ConvertirTermino = (terminos_string: string): Termino[] => {
   const terminos: Termino[] = [];
