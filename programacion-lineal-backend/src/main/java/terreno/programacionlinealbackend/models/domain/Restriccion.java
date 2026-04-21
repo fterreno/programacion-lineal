@@ -53,6 +53,12 @@ public class Restriccion {
         this.funcion_restricciones.add(holgura);
     }
 
+    // Agrega una variable artificial con coeficiente +1 para construir el vector unitario base
+    public void variablesArtificiales(String nombre_variable) {
+        Termino artificial = new Termino(1.0, nombre_variable, 1.0);
+        this.funcion_restricciones.add(artificial);
+    }
+
     // Asegura que se encuentren todas las variables (misma cantidad) para la matriz
     public void asegurarVariable(String nombre_variable) {
         boolean existe = funcion_restricciones.stream()
@@ -90,9 +96,9 @@ public class Restriccion {
 
     public String obtenerBase() {
         return this.funcion_restricciones.stream()
-                .filter(t -> t.getVariable().startsWith("S") && t.getCoeficiente() == 1.0)
+                .filter(t -> (t.getVariable().startsWith("S") || t.getVariable().startsWith("A")) && t.getCoeficiente() == 1.0)
                 .map(Termino::getVariable)
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No se encontró ninguna variable de holgura válida para ser base"));
+                .orElseThrow(() -> new IllegalStateException("No se encontró variable de base válida (holgura o artificial) para esta restricción"));
     }
 }

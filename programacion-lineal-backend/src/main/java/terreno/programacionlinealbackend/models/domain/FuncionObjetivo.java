@@ -26,6 +26,9 @@ public class FuncionObjetivo {
         }
     }
 
+    // Penalización M para el método de la M Grande
+    public static final double M = 1_000_000.0;
+
     // Agrega variables de holgura/exceso
     public void variablesHolgura(List<String> nombres_holgura) {
         if (this.termino == null) {
@@ -36,6 +39,18 @@ public class FuncionObjetivo {
             if (!existe) {
                 Termino holgura = new Termino(0.0, nombre, 1.0);
                 this.termino.add(holgura);
+            }
+        }
+    }
+
+    // Agrega variables artificiales con penalización ±M según tipo de optimización
+    public void variablesArtificiales(List<String> nombres_artificiales, Tipo tipo) {
+        if (this.termino == null) this.termino = new ArrayList<>();
+        double coeficiente = (tipo == Tipo.MAX) ? -M : M;
+        for (String nombre : nombres_artificiales) {
+            boolean existe = this.termino.stream().anyMatch(t -> t.getVariable().equals(nombre));
+            if (!existe) {
+                this.termino.add(new Termino(coeficiente, nombre, 1.0));
             }
         }
     }

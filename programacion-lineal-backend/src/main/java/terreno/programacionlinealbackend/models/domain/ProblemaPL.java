@@ -52,6 +52,61 @@ public class ProblemaPL {
         }
     }
 
+    // Construye la forma estándar para el Metodo de la M Grande
+    // <= agrega holgura Si(+1), >= agrega exceso Si(-1) + artificial Ai(+1), = agrega solo Ai(+1)
+    public void agregarVariablesArtificiales() {
+        restricciones.forEach(r -> r.normalizarVld());
+
+        int numeroS = 1;
+        int numeroA = 1;
+        List<String> nombres_holgura = new ArrayList<>();
+        List<String> nombres_artificiales = new ArrayList<>();
+
+        for (Restriccion r : restricciones) {
+            if (r.getOperador() == Operador.MENOR_IGUAL || r.getOperador() == Operador.MENOR) {
+                String nombre_s = "S" + numeroS++;
+                r.variablesHolgura(nombre_s);
+                nombres_holgura.add(nombre_s);
+            } else if (r.getOperador() == Operador.MAYOR_IGUAL || r.getOperador() == Operador.MAYOR) {
+                String nombre_s = "S" + numeroS++;
+                r.variablesHolgura(nombre_s);
+                nombres_holgura.add(nombre_s);
+                String nombre_a = "A" + numeroA++;
+                r.variablesArtificiales(nombre_a);
+                nombres_artificiales.add(nombre_a);
+            } else if (r.getOperador() == Operador.IGUAL) {
+                String nombre_a = "A" + numeroA++;
+                r.variablesArtificiales(nombre_a);
+                nombres_artificiales.add(nombre_a);
+            }
+        }
+
+        this.funcion_objetivo.variablesHolgura(nombres_holgura);
+        this.funcion_objetivo.variablesArtificiales(nombres_artificiales, this.funcion_objetivo.getTipo());
+
+        Set<String> todas_las_vars = obtenerTodasLasVariables();
+
+        // Orden: variables originales → holguras/excesos (S) → artificiales (A)
+        Comparator<Termino> comparador_m_grande = (t1, t2) -> {
+            boolean t1S = t1.getVariable().startsWith("S");
+            boolean t1A = t1.getVariable().startsWith("A");
+            boolean t2S = t2.getVariable().startsWith("S");
+            boolean t2A = t2.getVariable().startsWith("A");
+            boolean t1Extra = t1S || t1A;
+            boolean t2Extra = t2S || t2A;
+            if (t1Extra && !t2Extra) return 1;
+            if (!t1Extra && t2Extra) return -1;
+            if (t1S && t2A) return -1;
+            if (t1A && t2S) return 1;
+            return t1.getVariable().compareTo(t2.getVariable());
+        };
+
+        for (Restriccion r : restricciones) {
+            todas_las_vars.forEach(r::asegurarVariable);
+            r.ordenarTerminos(comparador_m_grande);
+        }
+    }
+
     private Set<String> obtenerTodasLasVariables() {
         Set<String> vars = new HashSet<>();
         funcion_objetivo.getTermino().forEach(t -> vars.add(t.getVariable()));

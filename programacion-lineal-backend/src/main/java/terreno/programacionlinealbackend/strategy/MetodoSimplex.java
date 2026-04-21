@@ -39,5 +39,5 @@ public class MetodoSimplex implements MetodosPL {
         } else {
             return ultima.getFila_cj_zj().stream().allMatch(valor -> valor >= 0); //Condicion de Minimizacion: si Z es de Minimización: (cj-zj) => 0;
         }
-        }
     }
+}
