@@ -1,6 +1,6 @@
 # Programación Lineal — Frontend
 
-Aplicación web de página única (SPA) desarrollada con React 19 y TypeScript que permite al usuario ingresar un modelo de Programación Lineal en texto plano, enviarlo al backend para su resolución y visualizar cada tableau del proceso Simplex junto con la región factible en 2D.
+Aplicación web de página única (SPA) desarrollada con React 19 y TypeScript que permite al usuario ingresar un modelo de Programación Lineal en texto plano, enviarlo al backend para su resolución y visualizar cada matriz del proceso Simplex junto con la región factible en 2D.
 
 ---
 
