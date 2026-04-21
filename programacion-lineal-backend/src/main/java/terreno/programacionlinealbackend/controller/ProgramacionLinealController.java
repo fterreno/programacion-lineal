@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/pl")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "https://fterreno.github.io"})
 public class ProgramacionLinealController {
 
     private final Map<MetodoTipo, MetodosPL> estrategias;
