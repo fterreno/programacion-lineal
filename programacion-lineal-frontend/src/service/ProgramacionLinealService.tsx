@@ -8,6 +8,15 @@ import type { FuncionObjetivo } from '../models/domain/FuncionObjetivo';
 import type { MetodoTipo } from '../models/domain/MetodoTipo';
 import { mapeo_operador } from '../models/domain/Operador';
 
+export class ErrorPL extends Error {
+  titulo: string;
+  constructor(titulo: string, descripcion: string) {
+    super(descripcion);
+    this.titulo = titulo;
+    this.name = 'ErrorPL';
+  }
+}
+
 const URL_API = 'http://localhost:8080/api/pl';
 
 const ConvertirTermino = (terminos_string: string): Termino[] => {
@@ -105,6 +114,10 @@ export const ResolverProblemaPL = async (
     });
     return respuesta.data;
   } catch (error: any) {
-    throw new Error(`No se pudo resolver el problema: ${error.message || error}`);
+    const datos = error.response?.data;
+    if (datos?.titulo && datos?.descripcion) {
+      throw new ErrorPL(datos.titulo, datos.descripcion);
+    }
+    throw new ErrorPL('Error de conexión', error.message || 'No se pudo conectar con el servidor');
   }
 };

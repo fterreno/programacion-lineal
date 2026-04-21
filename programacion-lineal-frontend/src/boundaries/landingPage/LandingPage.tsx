@@ -4,23 +4,22 @@ import styles from './LandingPage.module.css';
 import { BlockMath } from 'react-katex';
 import { MetodoTipo } from '../../models/domain/MetodoTipo';
 import { Tipo } from '../../models/domain/Tipo';
-import { ResolverProblemaPL } from '../../service/ProgramacionLinealService';
+import { ResolverProblemaPL, ErrorPL } from '../../service/ProgramacionLinealService';
 import type { SolicitudRespuesta } from '../../models/dtos/SolicitudRespuesta';
 
 interface LandingPageProps {
   al_solucionar: (respuesta: SolicitudRespuesta) => void;
+  al_error: (titulo: string, descripcion: string) => void;
 }
 
-const LandingPage = ({ al_solucionar }: LandingPageProps) => {
+const LandingPage = ({ al_solucionar, al_error }: LandingPageProps) => {
   const [metodo_tipo, setMetodoTipo] = useState<MetodoTipo>(MetodoTipo.simplex);
   const [tipo, setTipo] = useState<Tipo>(Tipo.MAX);
   const [funcion_objetivo, setFuncionObjetivo] = useState('');
   const [restricciones, setRestricciones] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
 
   const ManejarEnvio = async () => {
-    setError(null);
     setCargando(true);
     try {
       const respuesta = await ResolverProblemaPL(
@@ -31,8 +30,11 @@ const LandingPage = ({ al_solucionar }: LandingPageProps) => {
       );
       al_solucionar(respuesta);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      setError(msg);
+      if (err instanceof ErrorPL) {
+        al_error(err.titulo, err.message);
+      } else {
+        al_error('Error', err instanceof Error ? err.message : 'Error desconocido');
+      }
     } finally {
       setCargando(false);
     }
@@ -51,8 +53,8 @@ const LandingPage = ({ al_solucionar }: LandingPageProps) => {
   return (
     <div className={styles.container}>
       <nav className={styles.nav}>
-        <button className={styles.btnSecondary}>Documentacion</button>
-        <button className={styles.btnSecondary}>Formulario Errores</button>
+        <button className={styles.btnSecondary} onClick={() => window.open('/apoyo_cuantitativo_decisiones_2020.pdf', '_blank')}>Documentacion</button>
+        <button className={styles.btnSecondary} onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSda5dXlkqvtewRTXsjPikoAsJhq5dMxG7y5wezESgB0TfZoCA/viewform?usp=publish-editor', '_blank')}>Formulario Errores</button>
       </nav>
 
       <header className={styles.hero}>
@@ -127,20 +129,6 @@ const LandingPage = ({ al_solucionar }: LandingPageProps) => {
                   \\end{cases}
                 \\end{aligned}`}
               />
-            </div>
-          )}
-
-          {error && (
-            <div style={{
-              marginTop: '1.2rem',
-              padding: '0.9rem 1.1rem',
-              borderRadius: '8px',
-              background: 'rgba(200,60,60,0.12)',
-              border: '1px solid rgba(200,60,60,0.3)',
-              color: '#f4a0a0',
-              fontSize: '0.85rem',
-            }}>
-              <strong>Error:</strong> {error}
             </div>
           )}
 
