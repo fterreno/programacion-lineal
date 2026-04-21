@@ -53,7 +53,7 @@ const LandingPage = ({ al_solucionar, al_error }: LandingPageProps) => {
   return (
     <div className={styles.container}>
       <nav className={styles.nav}>
-        <button className={styles.btnSecondary} onClick={() => window.open('/apoyo_cuantitativo_decisiones_2020.pdf', '_blank')}>Documentacion</button>
+        <button className={styles.btnSecondary} onClick={() => window.open(`${import.meta.env.BASE_URL}apoyo_cuantitativo_decisiones_2020.pdf`, '_blank')}>Documentacion</button>
         <button className={styles.btnSecondary} onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSda5dXlkqvtewRTXsjPikoAsJhq5dMxG7y5wezESgB0TfZoCA/viewform?usp=publish-editor', '_blank')}>Formulario Errores</button>
       </nav>
 
