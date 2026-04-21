@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Instalar dependencias
         working-directory: programacion-lineal-frontend
@@ -32,7 +32,7 @@ jobs:
 
       - name: Build
         working-directory: programacion-lineal-frontend
-        run: npm run build
+        run: npx vite build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
