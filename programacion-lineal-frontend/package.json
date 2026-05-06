@@ -13,11 +13,10 @@
     "axios": "^1.13.2",
     "framer-motion": "^12.23.26",
     "katex": "^0.16.27",
-    "plotly.js-dist-min": "^3.3.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-katex": "^3.1.0",
-    "react-plotly.js": "^2.6.0"
+    "recharts": "^3.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

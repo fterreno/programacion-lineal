@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git mv *)",
+      "Bash(Get-ChildItem -Path \"programacion-lineal-frontend/src\" -Recurse -Include \"*.tsx\", \"*.ts\")",
+      "Bash(Select-Object FullName)",
+      "Bash(npm uninstall *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
+    ]
+  }
+}

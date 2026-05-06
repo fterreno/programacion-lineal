@@ -1,4 +1,7 @@
-import Plot from 'react-plotly.js';
+import {
+    ComposedChart, Line, Scatter, XAxis, YAxis,
+    CartesianGrid, ResponsiveContainer, Customized,
+} from 'recharts';
 import type { Restriccion } from '../../../models/domain/Restriccion';
 
 interface FeasibilityGraphProps {
@@ -7,29 +10,34 @@ interface FeasibilityGraphProps {
     indice_iteracion: number;
 }
 
-const ObtenerCoeficiente = (restriccion: Restriccion, nombre_variable: string): number =>
-    restriccion.funcion_restricciones.find(t => t.variable === nombre_variable)?.coeficiente ?? 0;
+interface RechartsScaleContext {
+    xAxisMap?: Record<string, { scale: (v: number) => number }>;
+    yAxisMap?: Record<string, { scale: (v: number) => number }>;
+}
+
+/* ── Funciones matemáticas puras (sin cambios) ──────────────────────────── */
+
+const ObtenerCoeficiente = (r: Restriccion, nombre: string): number =>
+    r.funcion_restricciones.find(t => t.variable === nombre)?.coeficiente ?? 0;
 
 const ResolverSistemaLineal = (
     a1: number, b1: number, c1: number,
     a2: number, b2: number, c2: number
 ): [number, number] | null => {
-    const determinante = a1 * b2 - a2 * b1;
-    if (Math.abs(determinante) < 1e-10) return null;
-    return [(c1 * b2 - c2 * b1) / determinante, (a1 * c2 - a2 * c1) / determinante];
+    const det = a1 * b2 - a2 * b1;
+    if (Math.abs(det) < 1e-10) return null;
+    return [(c1 * b2 - c2 * b1) / det, (a1 * c2 - a2 * c1) / det];
 };
 
 const EsFactible = (x: number, y: number, restricciones: Restriccion[]): boolean => {
     if (x < -1e-9 || y < -1e-9) return false;
     return restricciones.every(r => {
-        const a1 = ObtenerCoeficiente(r, 'x1');
-        const a2 = ObtenerCoeficiente(r, 'x2');
-        const lado_izquierdo = a1 * x + a2 * y;
-        const lado_derecho = r.valor_lado_derecho;
+        const li = ObtenerCoeficiente(r, 'x1') * x + ObtenerCoeficiente(r, 'x2') * y;
+        const ld = r.valor_lado_derecho;
         switch (r.operador) {
-            case 'menor_igual': return lado_izquierdo <= lado_derecho + 1e-9;
-            case 'mayor_igual': return lado_izquierdo >= lado_derecho - 1e-9;
-            case 'igual':       return Math.abs(lado_izquierdo - lado_derecho) < 1e-9;
+            case 'menor_igual': return li <= ld + 1e-9;
+            case 'mayor_igual': return li >= ld - 1e-9;
+            case 'igual':       return Math.abs(li - ld) < 1e-9;
             default:            return true;
         }
     });
@@ -37,138 +45,176 @@ const EsFactible = (x: number, y: number, restricciones: Restriccion[]): boolean
 
 const OrdenarPorAngulo = (puntos: [number, number][]): [number, number][] => {
     if (puntos.length === 0) return [];
-    const centro_x = puntos.reduce((s, p) => s + p[0], 0) / puntos.length;
-    const centro_y = puntos.reduce((s, p) => s + p[1], 0) / puntos.length;
+    const cx = puntos.reduce((s, p) => s + p[0], 0) / puntos.length;
+    const cy = puntos.reduce((s, p) => s + p[1], 0) / puntos.length;
     return [...puntos].sort((a, b) =>
-        Math.atan2(a[1] - centro_y, a[0] - centro_x) - Math.atan2(b[1] - centro_y, b[0] - centro_x)
+        Math.atan2(a[1] - cy, a[0] - cx) - Math.atan2(b[1] - cy, b[0] - cx)
     );
 };
 
 const ConstruirVerticesFactibles = (restricciones: Restriccion[]): [number, number][] => {
-    const candidatos: [number, number][] = [];
-
     type Linea = { a: number; b: number; c: number };
     const lineas: Linea[] = restricciones.map(r => ({
-        a: ObtenerCoeficiente(r, 'x1'),
-        b: ObtenerCoeficiente(r, 'x2'),
-        c: r.valor_lado_derecho,
+        a: ObtenerCoeficiente(r, 'x1'), b: ObtenerCoeficiente(r, 'x2'), c: r.valor_lado_derecho,
     }));
-    lineas.push({ a: 1, b: 0, c: 0 });
-    lineas.push({ a: 0, b: 1, c: 0 });
-
-    for (let i = 0; i < lineas.length; i++) {
+    lineas.push({ a: 1, b: 0, c: 0 }, { a: 0, b: 1, c: 0 });
+    const candidatos: [number, number][] = [];
+    for (let i = 0; i < lineas.length; i++)
         for (let j = i + 1; j < lineas.length; j++) {
-            const punto = ResolverSistemaLineal(
+            const p = ResolverSistemaLineal(
                 lineas[i].a, lineas[i].b, lineas[i].c,
-                lineas[j].a, lineas[j].b, lineas[j].c
+                lineas[j].a, lineas[j].b, lineas[j].c,
             );
-            if (punto && EsFactible(punto[0], punto[1], restricciones)) {
-                candidatos.push(punto);
-            }
+            if (p && EsFactible(p[0], p[1], restricciones)) candidatos.push(p);
         }
-    }
-
     return OrdenarPorAngulo(candidatos);
 };
+
+/* ── Polígono de región factible via <Customized> ───────────────────────── */
+
+interface PoligonoProps extends RechartsScaleContext {
+    vertices: [number, number][];
+}
+
+const PoligonoRegionFactible = ({ vertices, xAxisMap, yAxisMap }: PoligonoProps) => {
+    if (vertices.length < 3) return null;
+    const ex = xAxisMap?.['0']?.scale;
+    const ey = yAxisMap?.['0']?.scale;
+    if (!ex || !ey) return null;
+    const points = vertices.map(([x, y]) => `${ex(x)},${ey(y)}`).join(' ');
+    return (
+        <polygon
+            points={points}
+            fill="rgba(255,255,255,0.05)"
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth={1}
+        />
+    );
+};
+
+/* ── Marcador del punto BFS ─────────────────────────────────────────────── */
+
+const MarcadorBFS = ({ cx = 0, cy = 0, label }: { cx?: number; cy?: number; label: string }) => (
+    <g>
+        <circle cx={cx} cy={cy} r={5} fill="#ffffff" stroke="#000000" strokeWidth={1} />
+        <text x={cx} y={cy - 10} textAnchor="middle" fill="#ffffff"
+              fontSize={11} fontFamily="Inter, sans-serif">
+            {label}
+        </text>
+    </g>
+);
+
+/* ── Componente principal ───────────────────────────────────────────────── */
 
 const FeasibilityGraph = ({ restricciones, bfs_actual, indice_iteracion }: FeasibilityGraphProps) => {
     const vertices = ConstruirVerticesFactibles(restricciones);
 
-    const todos_x = vertices.map(v => v[0]).concat(bfs_actual.x1);
-    const todos_y = vertices.map(v => v[1]).concat(bfs_actual.x2);
+    // Cortes de cada restricción con los ejes positivos
+    const cortes_eje_x: number[] = [];
+    const cortes_eje_y: number[] = [];
+    restricciones.forEach(r => {
+        const a1 = ObtenerCoeficiente(r, 'x1');
+        const a2 = ObtenerCoeficiente(r, 'x2');
+        const b  = r.valor_lado_derecho;
+        if (Math.abs(a1) > 1e-10 && b / a1 >= 0) cortes_eje_x.push(b / a1);
+        if (Math.abs(a2) > 1e-10 && b / a2 >= 0) cortes_eje_y.push(b / a2);
+    });
+
+    // El dominio debe incluir vertices, punto BFS y todos los cortes con los ejes
+    const todos_x = vertices.map(v => v[0]).concat(bfs_actual.x1, ...cortes_eje_x);
+    const todos_y = vertices.map(v => v[1]).concat(bfs_actual.x2, ...cortes_eje_y);
     const max_x = Math.max(...todos_x, 1) * 1.25;
     const max_y = Math.max(...todos_y, 1) * 1.25;
 
-    const trazas_restricciones = restricciones.map((r, indice) => {
+    const lineas_restriccion = restricciones.map((r, i) => {
         const a1 = ObtenerCoeficiente(r, 'x1');
         const a2 = ObtenerCoeficiente(r, 'x2');
-        const b = r.valor_lado_derecho;
-        let valores_x: number[], valores_y: number[];
+        const b  = r.valor_lado_derecho;
+        const color = `hsl(${(i * 67 + 200) % 360}, 60%, 55%)`;
 
         if (Math.abs(a2) > 1e-10) {
-            valores_x = [0, max_x];
-            valores_y = valores_x.map(x => (b - a1 * x) / a2);
-        } else if (Math.abs(a1) > 1e-10) {
-            const x_constante = b / a1;
-            valores_x = [x_constante, x_constante];
-            valores_y = [0, max_y];
-        } else {
-            return null;
+            const y_int = b / a2;                                   // corte eje Y
+            const x_int = Math.abs(a1) > 1e-10 ? b / a1 : null;   // corte eje X
+
+            // Si ambos cortes son positivos, dibujar exactamente entre ellos
+            const puntos = (x_int !== null && x_int >= 0 && y_int >= 0)
+                ? [{ x: 0, y: y_int }, { x: x_int, y: 0 }]
+                : [{ x: 0, y: Math.max(0, y_int) }, { x: max_x, y: (b - a1 * max_x) / a2 }];
+
+            return { nombre: `R${i + 1}`, color, puntos };
         }
 
-        return {
-            x: valores_x,
-            y: valores_y,
-            type: 'scatter' as const,
-            mode: 'lines' as const,
-            name: `R${indice + 1}`,
-            line: { color: `hsl(${(indice * 67 + 200) % 360}, 60%, 55%)`, width: 1.5, dash: 'dot' as const },
-        };
-    }).filter((t): t is NonNullable<typeof t> => t !== null);
+        if (Math.abs(a1) > 1e-10) {
+            const xk = b / a1;
+            return { nombre: `R${i + 1}`, color, puntos: [{ x: xk, y: 0 }, { x: xk, y: max_y }] };
+        }
 
-    const traza_region = vertices.length > 0 ? {
-        x: [...vertices.map(v => v[0]), vertices[0][0]],
-        y: [...vertices.map(v => v[1]), vertices[0][1]],
-        type: 'scatter' as const,
-        mode: 'lines' as const,
-        fill: 'toself' as const,
-        fillcolor: 'rgba(255, 255, 255, 0.05)',
-        line: { color: 'rgba(255,255,255,0.2)', width: 1 },
-        name: 'Región factible',
-        showlegend: false,
-    } : null;
+        return null;
+    }).filter((r): r is NonNullable<typeof r> => r !== null);
 
-    const traza_bfs = {
-        x: [bfs_actual.x1],
-        y: [bfs_actual.x2],
-        type: 'scatter' as const,
-        mode: 'markers+text' as const,
-        marker: { color: '#ffffff', size: 10, symbol: 'circle' as const, line: { color: '#000', width: 1 } },
-        text: [`Iter ${indice_iteracion}`],
-        textposition: 'top center' as const,
-        textfont: { color: '#fff', size: 11 },
-        name: 'SBF actual',
-    };
-
-    const trazas = [
-        ...(traza_region ? [traza_region] : []),
-        ...trazas_restricciones,
-        traza_bfs,
-    ];
-
-    const disposicion = {
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(10,10,10,0.6)',
-        font: { color: '#888', family: 'Inter, sans-serif', size: 11 },
-        xaxis: {
-            title: 'x₁',
-            gridcolor: '#1a1a1a',
-            zerolinecolor: '#333',
-            range: [0, max_x],
-            tickfont: { color: '#555' },
-        },
-        yaxis: {
-            title: 'x₂',
-            gridcolor: '#1a1a1a',
-            zerolinecolor: '#333',
-            range: [0, max_y],
-            tickfont: { color: '#555' },
-        },
-        legend: {
-            font: { color: '#555', size: 10 },
-            bgcolor: 'rgba(0,0,0,0)',
-        },
-        margin: { t: 10, r: 10, b: 45, l: 45 },
-    };
+    const datos_bfs = [{ x: bfs_actual.x1, y: bfs_actual.x2 }];
+    const label_bfs = `Iter ${indice_iteracion}`;
 
     return (
-        <Plot
-            data={trazas}
-            layout={disposicion}
-            config={{ displayModeBar: false, responsive: true }}
-            style={{ width: '100%', height: '420px' }}
-            useResizeHandler
-        />
+        <ResponsiveContainer width="100%" height={420}>
+            <ComposedChart
+                data={[]}
+                margin={{ top: 16, right: 16, bottom: 36, left: 36 }}
+                style={{ background: 'rgba(10,10,10,0.6)', borderRadius: 8 }}
+            >
+                <CartesianGrid stroke="#1a1a1a" />
+
+                <XAxis
+                    dataKey="x"
+                    type="number"
+                    domain={[0, max_x]}
+                    tick={{ fill: '#555', fontSize: 11 }}
+                    axisLine={{ stroke: '#333' }}
+                    tickLine={{ stroke: '#555' }}
+                    label={{ value: 'x₁', position: 'insideBottom', offset: -16, fill: '#888', fontSize: 12 }}
+                />
+                <YAxis
+                    dataKey="y"
+                    type="number"
+                    domain={[0, max_y]}
+                    tick={{ fill: '#555', fontSize: 11 }}
+                    axisLine={{ stroke: '#333' }}
+                    tickLine={{ stroke: '#555' }}
+                    label={{ value: 'x₂', angle: -90, position: 'insideLeft', offset: 16, fill: '#888', fontSize: 12 }}
+                />
+
+                <Customized
+                    component={(props: RechartsScaleContext) => (
+                        <PoligonoRegionFactible vertices={vertices} {...props} />
+                    )}
+                />
+
+                {lineas_restriccion.map(r => (
+                    <Line
+                        key={r.nombre}
+                        data={r.puntos}
+                        dataKey="y"
+                        name={r.nombre}
+                        stroke={r.color}
+                        strokeWidth={1.5}
+                        strokeDasharray="3 3"
+                        dot={false}
+                        activeDot={false}
+                        isAnimationActive={false}
+                    />
+                ))}
+
+                <Scatter
+                    data={datos_bfs}
+                    dataKey="y"
+                    name="SBF actual"
+                    isAnimationActive={false}
+                    shape={(p: { cx?: number; cy?: number }) => (
+                        <MarcadorBFS cx={p.cx} cy={p.cy} label={label_bfs} />
+                    )}
+                />
+            </ComposedChart>
+        </ResponsiveContainer>
     );
 };
 
