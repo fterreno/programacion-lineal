@@ -262,6 +262,38 @@
 .legendDotRed   { background: rgba(239, 68, 68, 0.55); }
 .legendDotAmber { background: rgba(251, 191, 36, 0.55); }
 
+/* NAV BUTTONS */
+
+.navButtons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0 0.4rem;
+}
+
+.btnStep {
+  padding: 0.4rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.18);
+  color: #c8d2cf;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.btnStep:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.28);
+  color: #e8f0ed;
+}
+
+.btnStep:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 /* SCROLL HINT */
 
 .scrollHint {

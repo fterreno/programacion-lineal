@@ -26,9 +26,7 @@ const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
     const [direccion, setDireccion] = useState<'down' | 'up'>('down');
     const [cantidad_visible_multi, setCantidadVisible] = useState<number>(1);
 
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
     const referencia_inferior = useRef<HTMLDivElement>(null);
-    const scrollCooldown = useRef(false);
 
     /* --- derivaciones --- */
     const variables_decision = iteraciones[0]?.fila_etiqueta.filter(
@@ -54,7 +52,7 @@ const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
 
     const restricciones = respuesta.problema_solucionado.restricciones;
 
-    /* --- navegación por scroll --- */
+    /* --- navegación --- */
     const irSiguiente = useCallback(() => {
         setDireccion('down');
         setIndiceActual(i => Math.min(i + 1, iteraciones.length - 1));
@@ -64,24 +62,6 @@ const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
         setDireccion('up');
         setIndiceActual(i => Math.max(i - 1, 0));
     }, []);
-
-    const manejarScroll = useCallback((e: WheelEvent) => {
-        if (!mostrar_grafico) return;
-        e.preventDefault();
-        if (scrollCooldown.current) return;
-        scrollCooldown.current = true;
-        setTimeout(() => { scrollCooldown.current = false; }, 600);
-        if (e.deltaY > 0) irSiguiente();
-        else irAnterior();
-    }, [mostrar_grafico, irSiguiente, irAnterior]);
-
-    useEffect(() => {
-        if (!mostrar_grafico) return;
-        const area = scrollAreaRef.current;
-        if (!area) return;
-        area.addEventListener('wheel', manejarScroll, { passive: false });
-        return () => area.removeEventListener('wheel', manejarScroll);
-    }, [mostrar_grafico, manejarScroll]);
 
     /* scroll suave para modo multi-iteraciones */
     useEffect(() => {
@@ -103,7 +83,7 @@ const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
     const layout_con_grafico = (
         <div className={styles.splitLayout}>
             <div>
-                <div ref={scrollAreaRef} className={styles.matricesScrollArea}>
+                <div className={styles.matricesScrollArea}>
                     <AnimatePresence mode="wait" initial={false} custom={direccion}>
                         <motion.div
                             key={indice_actual}
@@ -142,11 +122,25 @@ const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
                         </motion.div>
                     )}
 
-                    <p className={styles.scrollHint}>
-                        {indice_actual > 0 && '↑ · '}
-                        Iteración {indice_actual + 1} de {iteraciones.length}
-                        {!es_ultima && ' · ↓ Scroll para avanzar'}
-                    </p>
+                    <div className={styles.navButtons}>
+                        <button
+                            className={styles.btnStep}
+                            onClick={irAnterior}
+                            disabled={indice_actual === 0}
+                        >
+                            ← Anterior
+                        </button>
+                        <span className={styles.scrollHint}>
+                            Iteración {indice_actual + 1} de {iteraciones.length}
+                        </span>
+                        <button
+                            className={styles.btnStep}
+                            onClick={irSiguiente}
+                            disabled={es_ultima}
+                        >
+                            Siguiente →
+                        </button>
+                    </div>
                 </div>
             </div>
 
