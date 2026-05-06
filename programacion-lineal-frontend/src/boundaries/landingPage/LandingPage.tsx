@@ -62,7 +62,6 @@ const LandingPage = ({ al_solucionar, al_error }: LandingPageProps) => {
         <p className={styles.subtitle}>
           Resuelve modelos complejos mediante Simplex, Método Gráfico o Base Artificial.
           Iteraciones detalladas con tablas de pivoteo. Manejo de variables de holgura, exceso y artificiales.
-          Análisis de sensibilidad y precios sombra incluidos.
         </p>
       </header>
 
@@ -143,13 +142,8 @@ const LandingPage = ({ al_solucionar, al_error }: LandingPageProps) => {
       </section>
 
       <footer className={styles.footer}>
-        <div className={styles.footerLeft}>
-          <p>Desarrollador</p>
+        <div className={styles.footerCentral}>
           <p>Terreno Monla Florencia Sofia</p>
-        </div>
-        <div className={styles.footerRight}>
-          <p>Progrmacion Lineal</p>
-          <p>Metodo Simplex</p>
         </div>
       </footer>
     </div>

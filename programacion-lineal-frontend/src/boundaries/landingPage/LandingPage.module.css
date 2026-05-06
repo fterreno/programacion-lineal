@@ -229,9 +229,74 @@
   align-items: flex-start;
 }
 
-.footerLeft p,
-.footerRight p {
+.footerCentral p {
   font-size: 0.82rem;
   color: #7a8c88;
   line-height: 1.5;
+}
+
+/* ── RESPONSIVE ── */
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 2rem 1.2rem 1.2rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+    letter-spacing: -0.2px;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .appSection {
+    margin: 1.2rem auto 1.8rem;
+    padding: 0 0.75rem;
+  }
+
+  .glassCard {
+    padding: 1.6rem 1.2rem;
+  }
+
+  .formHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.9rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .gridInputs {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .footerRight {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .nav {
+    padding: 0.7rem 1rem;
+  }
+
+  .btnSecondary {
+    font-size: 0.76rem;
+    padding: 0.35rem 0.75rem;
+  }
 }

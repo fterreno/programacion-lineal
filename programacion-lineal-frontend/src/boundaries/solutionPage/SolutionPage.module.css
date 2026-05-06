@@ -377,3 +377,119 @@
   color: #7a8c88;
   line-height: 1.5;
 }
+
+/* ── RESPONSIVE ── */
+
+@media (max-width: 768px) {
+  .nav {
+    padding: 0.6rem 1rem;
+  }
+
+  .pageHeader {
+    padding: 1rem 1rem 0;
+  }
+
+  .pageHeader h1 {
+    font-size: 1.4rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .separator {
+    margin: 0 1rem;
+  }
+
+  .mainContent {
+    padding: 1.2rem 0.75rem 1.2rem;
+  }
+
+  /* Con gráfico: apilar en columna, gráfico primero */
+  .splitLayout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    max-width: 100%;
+  }
+
+  .graphPanel {
+    position: static;
+    order: -1;
+  }
+
+  .graphCard {
+    padding: 1rem;
+  }
+
+  /* Sin gráfico */
+  .singleLayout {
+    max-width: 100%;
+  }
+
+  /* Tabla simplex: texto más pequeño para caber en pantalla */
+  .tableauCard {
+    padding: 1rem 0.75rem;
+  }
+
+  .simplexTable {
+    font-size: 0.72rem;
+    min-width: 320px;
+  }
+
+  .simplexTable th,
+  .simplexTable td {
+    padding: 0.35rem 0.4rem;
+  }
+
+  /* Botones de navegación */
+  .navButtons {
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .btnStep {
+    font-size: 0.78rem;
+    padding: 0.4rem 0.85rem;
+  }
+
+  /* Sección óptima */
+  .optimalSection {
+    padding: 1.2rem;
+  }
+
+  .optimalZ {
+    font-size: 1.3rem;
+  }
+
+  /* Footer */
+  .footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .footerRight {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .pageHeader h1 {
+    font-size: 1.2rem;
+  }
+
+  .btnNav,
+  .btnInicio {
+    font-size: 0.76rem;
+    padding: 0.35rem 0.75rem;
+  }
+
+  .simplexTable {
+    font-size: 0.65rem;
+  }
+
+  .simplexTable th,
+  .simplexTable td {
+    padding: 0.28rem 0.3rem;
+  }
+}
