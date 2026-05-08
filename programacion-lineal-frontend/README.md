@@ -16,7 +16,7 @@ Aplicación web de página única (SPA) desarrollada con React 19 y TypeScript q
 
 **KaTeX 0.16 + react-katex** — renderizado de expresiones matemáticas en formato LaTeX. Convierte la entrada en texto plano a notación matemática tipográfica en tiempo real mientras el usuario escribe.
 
-**Plotly.js (dist-min) + react-plotly.js** — visualización del gráfico de región factible. La distribución minificada reduce el tamaño del bundle. Dado que la librería carece de tipos oficiales, el proyecto incluye una declaración manual en `react-plotly.d.ts`.
+**Recharts 2.x** — visualización del gráfico de región factible. Reemplaza a react-plotly.js reduciendo el bundle de ~3.9 MB a ~977 KB (gzip: ~303 KB). El gráfico usa `ComposedChart` dentro de `ResponsiveContainer` con `aspect={1}` para mantener proporciones cuadradas en cualquier tamaño de pantalla. El polígono de la región factible se traza mediante `<Customized>`, que inyecta las funciones de escala D3 internas de Recharts (`xAxisMap['0'].scale` / `yAxisMap['0'].scale`) para convertir coordenadas de datos a píxeles SVG y dibujar un `<polygon>` arbitrario. Cada línea de restricción se renderiza como una `<Line>` independiente con su propio `data` de dos puntos. Las etiquetas de coordenadas en cada punto de intersección se dibujan con SVG puro usando `paintOrder="stroke"` para legibilidad sin fondos opacos.
 
 **Framer Motion 12** — animaciones de entrada para cada tableau Simplex. Cada iteración aparece con una transición de opacidad y desplazamiento vertical al ser cargada.
 
@@ -37,7 +37,6 @@ programacion-lineal-frontend/
     ├── main.tsx
     ├── App.tsx
     ├── index.css
-    ├── react-plotly.d.ts
     ├── service/
     │   └── ProgramacionLinealService.tsx
     ├── models/
@@ -75,9 +74,9 @@ programacion-lineal-frontend/
 
 **`boundaries/landingPage/`** — Página de entrada al flujo. Contiene el formulario completo de configuración del modelo: selección del tipo de optimización, entrada de la función objetivo, selección del método y área de restricciones. También gestiona la previsualización LaTeX en tiempo real y el estado de carga durante la llamada al backend.
 
-**`boundaries/solutionPage/`** — Página de resultados. Orquesta la visualización progresiva de las iteraciones y decide el layout según la cantidad de variables de decisión detectadas: dos columnas si el problema es graficable (exactamente 2 variables), columna única en caso contrario.
+**`boundaries/solutionPage/`** — Página de resultados. Orquesta la visualización progresiva de las iteraciones mediante botones de navegación (← Anterior / Siguiente →) y decide el layout según la cantidad de variables de decisión detectadas: dos columnas si el problema es graficable (exactamente 2 variables), columna única en caso contrario. En mobile, el layout de dos columnas se convierte en una columna única con el gráfico posicionado encima del tableau mediante `order: -1`.
 
-**`boundaries/solutionPage/components/`** — Componentes de presentación puros que no realizan llamadas ni gestionan estado propio. `SimplexTableau` recibe un único `MatrizSimplex` y lo renderiza como tabla HTML con resaltado de celdas según el rol de cada variable en la iteración (pivote, entrante, saliente). `FeasibilityGraph` recibe las restricciones y la solución básica factible actual, calcula algebraicamente los vértices de la región factible e invoca Plotly para dibujar las líneas de restricción, el polígono relleno y el punto BFS.
+**`boundaries/solutionPage/components/`** — Componentes de presentación puros que no realizan llamadas ni gestionan estado propio. `SimplexTableau` recibe un único `MatrizSimplex` y lo renderiza como tabla HTML con resaltado de celdas según el rol de cada variable en la iteración (pivote, entrante, saliente). `FeasibilityGraph` recibe las restricciones y la solución básica factible actual, calcula algebraicamente los vértices de la región factible y los puntos de corte de cada restricción con los ejes positivos, y utiliza Recharts para dibujar: el polígono de la región factible, las líneas de restricción con etiquetas de coordenadas en cada intersección, y el punto BFS con su número de iteración.
 
 ---
 
@@ -85,7 +84,7 @@ programacion-lineal-frontend/
 
 ### Flujo de datos
 
-El usuario ingresa la función objetivo y las restricciones como texto plano. Al enviar el formulario, el servicio parsea esas cadenas, construye un objeto `SolicitudProblema` y lo envía al backend. La respuesta (`SolicitudRespuesta`) contiene el problema resuelto con la lista completa de iteraciones, que `SolutionPage` consume para renderizar cada tableau de forma progresiva.
+El usuario ingresa la función objetivo y las restricciones como texto plano. Al enviar el formulario, el servicio parsea esas cadenas, construye un objeto `SolicitudProblema` y lo envía al backend. La respuesta (`SolicitudRespuesta`) contiene el problema resuelto con la lista completa de iteraciones, que `SolutionPage` consume para renderizar cada tableau de forma progresiva mediante botones de navegación.
 
 ```text
 LandingPage
@@ -106,7 +105,7 @@ App.tsx  →  setEstadoPagina({ pagina: 'solucion', respuesta })
     │
     ▼
 SolutionPage
-    ├── SimplexTableau (× n iteraciones, carga progresiva)
+    ├── SimplexTableau (× n iteraciones, navegación con botones ← →)
     └── FeasibilityGraph (solo si variables_decision.length === 2)
 ```
 

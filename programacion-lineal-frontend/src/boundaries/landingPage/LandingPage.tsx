@@ -60,7 +60,7 @@ const LandingPage = ({ al_solucionar, al_error }: LandingPageProps) => {
       <header className={styles.hero}>
         <h1 className={styles.title}>Resuelve Programacion Lineal</h1>
         <p className={styles.subtitle}>
-          Resuelve modelos complejos mediante Simplex, Método Gráfico o Base Artificial.
+          Resuelve modelos complejos mediante Método Gráfico, Simplex o Base Artificial.
           Iteraciones detalladas con tablas de pivoteo. Manejo de variables de holgura, exceso y artificiales.
         </p>
       </header>
