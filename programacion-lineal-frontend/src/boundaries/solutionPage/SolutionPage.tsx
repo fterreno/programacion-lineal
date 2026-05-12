@@ -2,13 +2,17 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { SolicitudRespuesta } from '../../models/dtos/SolicitudRespuesta';
 import type { MatrizSimplex } from '../../models/domain/MatrizSimplex';
+import type { MetodoTipo } from '../../models/domain/MetodoTipo';
+import { EmpateVariableSalida, ErrorPL } from '../../service/ProgramacionLinealService';
 import styles from './SolutionPage.module.css';
 import SimplexTableau from './components/SimplexTableau';
 import FeasibilityGraph from './components/FeasibilityGraph';
 
 interface SolutionPageProps {
     respuesta: SolicitudRespuesta;
+    metodo_tipo: MetodoTipo;
     al_volver: () => void;
+    al_error: (titulo: string, descripcion: string) => void;
 }
 
 const ObtenerValorBFS = (nombre_variable: string, iteracion: MatrizSimplex): number => {
@@ -18,8 +22,11 @@ const ObtenerValorBFS = (nombre_variable: string, iteracion: MatrizSimplex): num
 
 const Formatear = (n: number): string => Number(n.toFixed(4)).toString();
 
-const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
-    const iteraciones = respuesta.problema_solucionado.iteraciones ?? [];
+const SolutionPage = ({ respuesta, metodo_tipo, al_volver, al_error }: SolutionPageProps) => {
+    const [respuesta_local, setRespuestaLocal] = useState<SolicitudRespuesta>(respuesta);
+    const [cargando_empate, setCargandoEmpate] = useState(false);
+
+    const iteraciones = respuesta_local.problema_solucionado.iteraciones ?? [];
 
     /* --- hooks (todos al inicio) --- */
     const [indice_actual, setIndiceActual] = useState<number>(0);
@@ -50,7 +57,16 @@ const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
         ? { x1: ObtenerValorBFS('x1', iteracion_actual), x2: ObtenerValorBFS('x2', iteracion_actual) }
         : { x1: 0, x2: 0 };
 
-    const restricciones = respuesta.problema_solucionado.restricciones;
+    const restricciones = respuesta_local.problema_solucionado.restricciones;
+
+    /* --- estado de empate --- */
+    const variables_empatadas = respuesta_local.variables_empatadas ?? [];
+    const ratios_empatados = respuesta_local.ratios_empatados ?? [];
+    const hay_empate_activo = variables_empatadas.length > 0 && (
+        mostrar_grafico
+            ? es_ultima
+            : cantidad_visible_multi >= iteraciones.length
+    );
 
     /* --- navegación --- */
     const irSiguiente = useCallback(() => {
@@ -68,12 +84,72 @@ const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
         if (!mostrar_grafico) referencia_inferior.current?.scrollIntoView({ behavior: 'smooth' });
     }, [cantidad_visible_multi, mostrar_grafico]);
 
+    /* --- handler de elección de empate --- */
+    const handleEmpateElegido = async (variableElegida: string) => {
+        setCargandoEmpate(true);
+        const count_antes = iteraciones.length;
+        try {
+            const nueva_respuesta = await EmpateVariableSalida(
+                respuesta_local.problema_solucionado,
+                variableElegida,
+                metodo_tipo
+            );
+            setRespuestaLocal(nueva_respuesta);
+            if (mostrar_grafico) {
+                setDireccion('down');
+                setIndiceActual(count_antes);
+            } else {
+                setCantidadVisible(count_antes + 1);
+            }
+        } catch (err: unknown) {
+            if (err instanceof ErrorPL) {
+                al_error(err.titulo, err.message);
+            } else {
+                al_error('Error', err instanceof Error ? err.message : 'Error desconocido');
+            }
+        } finally {
+            setCargandoEmpate(false);
+        }
+    };
+
     /* --- variantes de animación --- */
     const variantes = {
         entrar: (dir: 'down' | 'up') => ({ opacity: 0, y: dir === 'down' ? 40 : -40 }),
         visible: { opacity: 1, y: 0 },
         salir: (dir: 'down' | 'up') => ({ opacity: 0, y: dir === 'down' ? -40 : 40 }),
     };
+
+    /* --- panel de empate (reutilizado en ambos layouts) --- */
+    const panel_empate = hay_empate_activo && (
+        <motion.div
+            className={styles.empateSection}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28 }}
+        >
+            <p className={styles.empateTitle}>
+                Empate en la variable de salida — elegí con cuál continuar:
+            </p>
+            <div className={styles.empateButtons}>
+                {variables_empatadas.map((variable, i) => (
+                    <button
+                        key={variable}
+                        className={styles.empateBtn}
+                        onClick={() => handleEmpateElegido(variable)}
+                        disabled={cargando_empate}
+                    >
+                        <span className={styles.empateVarName}>{variable}</span>
+                        <span className={styles.empateRatio}>
+                            θ = {Formatear(ratios_empatados[i] ?? 0)}
+                        </span>
+                    </button>
+                ))}
+            </div>
+            {cargando_empate && (
+                <p className={styles.empateCargando}>Calculando…</p>
+            )}
+        </motion.div>
+    );
 
     /* === LAYOUT CON GRÁFICO (2 variables) === */
     const z_actual = iteracion_actual
@@ -101,6 +177,8 @@ const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
                             />
                         </motion.div>
                     </AnimatePresence>
+
+                    {panel_empate}
 
                     {es_solucion_optima && (
                         <motion.div
@@ -136,7 +214,7 @@ const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
                         <button
                             className={styles.btnStep}
                             onClick={irSiguiente}
-                            disabled={es_ultima}
+                            disabled={es_ultima || hay_empate_activo}
                         >
                             Siguiente →
                         </button>
@@ -171,12 +249,14 @@ const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
                         <SimplexTableau
                             iteracion={iter}
                             indice={i}
-                            es_optima={i === iteraciones.length - 1}
+                            es_optima={i === iteraciones.length - 1 && !hay_empate_activo}
                         />
                     </motion.div>
                 ))}
 
-                {cantidad_visible_multi >= iteraciones.length && (
+                {panel_empate}
+
+                {!hay_empate_activo && cantidad_visible_multi >= iteraciones.length && (
                     <motion.div
                         className={styles.optimalSection}
                         initial={{ opacity: 0, scale: 0.96 }}
@@ -195,7 +275,7 @@ const SolutionPage = ({ respuesta, al_volver }: SolutionPageProps) => {
                     </motion.div>
                 )}
 
-                {cantidad_visible_multi < iteraciones.length && (
+                {cantidad_visible_multi < iteraciones.length && !hay_empate_activo && (
                     <p
                         className={styles.scrollHint}
                         style={{ cursor: 'pointer' }}

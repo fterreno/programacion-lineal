@@ -3,9 +3,12 @@ package terreno.programacionlinealbackend.models.domain;
 import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
+import terreno.programacionlinealbackend.exception.EmpateException;
 
 @Data
 public class MatrizSimplex {
+
+    private static final double TOLERANCIA_EMPATE = 1e-9;
     private List<Double> fila_cj; // Fila de coeficientes de la función objetivo
     private List<String> fila_etiqueta; // Nombre de las columnas
 
@@ -134,15 +137,32 @@ public class MatrizSimplex {
         }
 
         double tita_minimo = Double.POSITIVE_INFINITY;
-        int fila_pivote = -1;
+        List<Integer> filas_empatadas = new ArrayList<>();
 
         for (int i = 0; i < tita.size(); i++) {
-            if ((0 < tita.get(i)) && (tita.get(i) < tita_minimo)) {
-                tita_minimo = tita.get(i);
-                fila_pivote = i;
+            if (tita.get(i) > 0) {
+                double ratio = tita.get(i);
+                if (ratio < tita_minimo - TOLERANCIA_EMPATE) {
+                    tita_minimo = ratio;
+                    filas_empatadas.clear();
+                    filas_empatadas.add(i);
+                } else if (Math.abs(ratio - tita_minimo) <= TOLERANCIA_EMPATE) {
+                    filas_empatadas.add(i);
+                }
             }
         }
-        this.variable_salida = this.columna_base.get(fila_pivote);
+
+        if (filas_empatadas.size() > 1) {
+            List<String> vars_empatadas = new ArrayList<>();
+            List<Double> ratios_empatados = new ArrayList<>();
+            for (int fila : filas_empatadas) {
+                vars_empatadas.add(this.columna_base.get(fila));
+                ratios_empatados.add(tita.get(fila));
+            }
+            throw new EmpateException(vars_empatadas, ratios_empatados);
+        }
+
+        this.variable_salida = this.columna_base.get(filas_empatadas.get(0));
     }
 
 }

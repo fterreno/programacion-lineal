@@ -361,6 +361,78 @@
   color: #e0e8e5;
 }
 
+/* EMPATE SECTION */
+
+.empateSection {
+  margin-top: 1.2rem;
+  padding: 1.4rem 1.8rem;
+  border-radius: 14px;
+  background: rgba(251, 191, 36, 0.05);
+  border: 1px solid rgba(251, 191, 36, 0.28);
+}
+
+.empateTitle {
+  margin: 0 0 1rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #fde68a;
+  letter-spacing: 0.2px;
+}
+
+.empateButtons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.empateBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 1.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.38);
+  background: rgba(251, 191, 36, 0.07);
+  color: #fde68a;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.empateBtn:hover:not(:disabled) {
+  background: rgba(251, 191, 36, 0.16);
+  border-color: rgba(251, 191, 36, 0.6);
+  transform: translateY(-1px);
+}
+
+.empateBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.empateBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.empateVarName {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.empateRatio {
+  font-size: 0.7rem;
+  color: #c8a83a;
+}
+
+.empateCargando {
+  margin: 0.8rem 0 0;
+  font-size: 0.78rem;
+  color: #fde68a;
+  opacity: 0.65;
+}
+
 /* FOOTER */
 
 .footer {

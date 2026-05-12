@@ -86,6 +86,26 @@ const ConvertirRestricciones = (restriccion_string: string): Restriccion[] => {
   return restricciones;
 };
 
+export const EmpateVariableSalida = async (
+  problema_parcial: import('../models/domain/ProblemaPL').ProblemaPL,
+  variable_salida_elegida: string,
+  metodo_tipo: MetodoTipo
+): Promise<SolicitudRespuesta> => {
+  const seleccion = { metodo_tipo, problema_parcial, variable_salida_elegida };
+  try {
+    const respuesta = await axios.post(`${URL_API}/empateVariableSalida`, seleccion, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return respuesta.data;
+  } catch (error: any) {
+    const datos = error.response?.data;
+    if (datos?.titulo && datos?.descripcion) {
+      throw new ErrorPL(datos.titulo, datos.descripcion);
+    }
+    throw new ErrorPL('Error de conexión', error.message || 'No se pudo conectar con el servidor');
+  }
+};
+
 export const ResolverProblemaPL = async (
   funcion_str: string,
   restricciones_str: string,

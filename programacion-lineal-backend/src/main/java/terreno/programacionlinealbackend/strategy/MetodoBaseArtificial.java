@@ -1,6 +1,7 @@
 package terreno.programacionlinealbackend.strategy;
 
 import org.springframework.stereotype.Component;
+import terreno.programacionlinealbackend.exception.EmpateException;
 import terreno.programacionlinealbackend.models.DTOs.SolicitudRespuesta;
 import terreno.programacionlinealbackend.models.domain.MatrizSimplex;
 import terreno.programacionlinealbackend.models.domain.ProblemaPL;
@@ -15,14 +16,46 @@ public class MetodoBaseArtificial implements MetodosPL {
     public SolicitudRespuesta resolver(ProblemaPL problema) {
         problema.validar();
         primeraFase(problema);
-        while (!esSolucion(problema)) {
-            segundaFase(problema);
+        try {
+            while (!esSolucion(problema)) {
+                segundaFase(problema);
+            }
+        } catch (EmpateException e) {
+            return buildRespuestaEmpate(problema, e);
         }
         verificarFactibilidad(problema);
 
         SolicitudRespuesta respuesta = new SolicitudRespuesta();
         respuesta.setMensaje("Método Base Artificial: " + problema);
         respuesta.setProblema_solucionado(problema);
+        return respuesta;
+    }
+
+    @Override
+    public SolicitudRespuesta resolverDesdeEmpate(ProblemaPL problema, String variableElegida) {
+        problema.variableSalidaElegida(variableElegida);
+        problema.actualizarMatrizConSalidaForzada();
+        try {
+            while (!esSolucion(problema)) {
+                segundaFase(problema);
+            }
+        } catch (EmpateException e) {
+            return buildRespuestaEmpate(problema, e);
+        }
+        verificarFactibilidad(problema);
+
+        SolicitudRespuesta respuesta = new SolicitudRespuesta();
+        respuesta.setMensaje("Método Base Artificial: " + problema);
+        respuesta.setProblema_solucionado(problema);
+        return respuesta;
+    }
+
+    private SolicitudRespuesta buildRespuestaEmpate(ProblemaPL problema, EmpateException e) {
+        SolicitudRespuesta respuesta = new SolicitudRespuesta();
+        respuesta.setMensaje("Empate en la variable de salida");
+        respuesta.setProblema_solucionado(problema);
+        respuesta.setVariables_empatadas(e.getVariablesEmpatadas());
+        respuesta.setRatios_empatados(e.getRatiosEmpatados());
         return respuesta;
     }
 

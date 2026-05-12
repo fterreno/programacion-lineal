@@ -8,7 +8,7 @@ import { ResolverProblemaPL, ErrorPL } from '../../service/ProgramacionLinealSer
 import type { SolicitudRespuesta } from '../../models/dtos/SolicitudRespuesta';
 
 interface LandingPageProps {
-  al_solucionar: (respuesta: SolicitudRespuesta) => void;
+  al_solucionar: (respuesta: SolicitudRespuesta, metodo_tipo: MetodoTipo) => void;
   al_error: (titulo: string, descripcion: string) => void;
 }
 
@@ -28,7 +28,7 @@ const LandingPage = ({ al_solucionar, al_error }: LandingPageProps) => {
         metodo_tipo,
         tipo
       );
-      al_solucionar(respuesta);
+      al_solucionar(respuesta, metodo_tipo);
     } catch (err: unknown) {
       if (err instanceof ErrorPL) {
         al_error(err.titulo, err.message);

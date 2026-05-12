@@ -5,4 +5,5 @@ import terreno.programacionlinealbackend.models.domain.ProblemaPL;
 
 public interface MetodosPL {
     SolicitudRespuesta resolver(ProblemaPL problema);
+    SolicitudRespuesta resolverDesdeEmpate(ProblemaPL problema, String variableElegida);
 }

@@ -1,6 +1,7 @@
 package terreno.programacionlinealbackend.controller;
 
 import org.springframework.web.bind.annotation.*;
+import terreno.programacionlinealbackend.models.DTOs.EmpateSeleccion;
 import terreno.programacionlinealbackend.models.DTOs.SolicitudProblema;
 import terreno.programacionlinealbackend.models.DTOs.SolicitudRespuesta;
 import terreno.programacionlinealbackend.models.domain.MetodoTipo;
@@ -30,5 +31,12 @@ public class ProgramacionLinealController {
         MetodosPL estrategia = estrategias.get(solicitud.getMetodo_tipo());
         if (estrategia == null) throw new IllegalArgumentException("Método no soportado: " + solicitud.getMetodo_tipo());
         return estrategia.resolver(solicitud.getProblema());
+    }
+
+    @PostMapping("/empateVariableSalida")
+    public SolicitudRespuesta empateVariableSalida(@RequestBody EmpateSeleccion seleccion) {
+        MetodosPL estrategia = estrategias.get(seleccion.getMetodo_tipo());
+        if (estrategia == null) throw new IllegalArgumentException("Método no soportado: " + seleccion.getMetodo_tipo());
+        return estrategia.resolverDesdeEmpate(seleccion.getProblema_parcial(), seleccion.getVariable_salida_elegida());
     }
 }

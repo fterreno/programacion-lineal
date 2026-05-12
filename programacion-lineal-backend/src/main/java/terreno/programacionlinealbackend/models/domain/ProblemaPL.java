@@ -172,6 +172,14 @@ public class ProblemaPL {
         this.getIteraciones().get(this.getIteraciones().size() - 1).variableSalida();
     }
 
+    public void variableSalidaElegida(String variableElegida) {
+        MatrizSimplex ultima = this.getIteraciones().get(this.getIteraciones().size() - 1);
+        if (!ultima.getColumna_base().contains(variableElegida)) {
+            throw new IllegalArgumentException("La variable '" + variableElegida + "' no está en la base actual");
+        }
+        ultima.setVariable_salida(variableElegida);
+    }
+
     public void actualizarMatriz() {
         MatrizSimplex ultima = this.getIteraciones().get(this.getIteraciones().size() - 1);
         // Copiar f_cj y etiquetas y c_cb y c_base y c_vld
@@ -207,6 +215,44 @@ public class ProblemaPL {
             }
         }
         // Setear los valores de la nueva matriz
+        MatrizSimplex nueva_matriz_simplex = new MatrizSimplex(nuevo_fila_cj, nuevo_fila_etiqueta, nueva_matriz, null, null, nuevo_columna_cb, nuevo_columna_base, nuevo_columna_vld, null, null);
+        nueva_matriz_simplex.calcularSolucionCoste();
+        this.getIteraciones().add(nueva_matriz_simplex);
+    }
+
+    public void actualizarMatrizConSalidaForzada() {
+        MatrizSimplex ultima = this.getIteraciones().get(this.getIteraciones().size() - 1);
+        List<Double> nuevo_fila_cj = new ArrayList<>(ultima.getFila_cj());
+        List<String> nuevo_fila_etiqueta = new ArrayList<>(ultima.getFila_etiqueta());
+        List<Double> nuevo_columna_cb = new ArrayList<>(ultima.getColumna_cb());
+        List<String> nuevo_columna_base = new ArrayList<>(ultima.getColumna_base());
+        List<Double> nuevo_columna_vld = new ArrayList<>(ultima.getColumna_vld());
+
+        double[][] nueva_matriz = new double[ultima.getMatriz_restricciones().length][ultima.getMatriz_restricciones()[0].length];
+        for (int i = 0; i < nueva_matriz.length; i++)
+            for (int j = 0; j < nueva_matriz[0].length; j++)
+                nueva_matriz[i][j] = ultima.getMatriz_restricciones()[i][j];
+
+        int columna_pivote = nuevo_fila_etiqueta.indexOf(ultima.getVariable_entrada());
+        int fila_pivote = nuevo_columna_base.indexOf(ultima.getVariable_salida());
+
+        nuevo_columna_base.set(fila_pivote, ultima.getVariable_entrada());
+        nuevo_columna_cb.set(fila_pivote, ultima.getFila_cj().get(columna_pivote));
+
+        double pivote = nueva_matriz[fila_pivote][columna_pivote];
+        for (int j = 0; j < nueva_matriz[0].length; j++)
+            nueva_matriz[fila_pivote][j] /= pivote;
+        nuevo_columna_vld.set(fila_pivote, nuevo_columna_vld.get(fila_pivote) / pivote);
+
+        for (int i = 0; i < nueva_matriz.length; i++) {
+            if (i != fila_pivote) {
+                double factor = nueva_matriz[i][columna_pivote];
+                for (int j = 0; j < nueva_matriz[0].length; j++)
+                    nueva_matriz[i][j] -= factor * nueva_matriz[fila_pivote][j];
+                nuevo_columna_vld.set(i, nuevo_columna_vld.get(i) - factor * nuevo_columna_vld.get(fila_pivote));
+            }
+        }
+
         MatrizSimplex nueva_matriz_simplex = new MatrizSimplex(nuevo_fila_cj, nuevo_fila_etiqueta, nueva_matriz, null, null, nuevo_columna_cb, nuevo_columna_base, nuevo_columna_vld, null, null);
         nueva_matriz_simplex.calcularSolucionCoste();
         this.getIteraciones().add(nueva_matriz_simplex);
