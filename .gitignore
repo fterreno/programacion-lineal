@@ -1,0 +1,11 @@
+# Claude Code (configuración local, no compartir)
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
