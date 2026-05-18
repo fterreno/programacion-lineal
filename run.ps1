@@ -9,7 +9,7 @@ if (-not (Test-Path $pythonPath)) {
     $pythonPath = Join-Path $venvDir "Scripts\python.exe"
 }
 
-Write-Host "Instalando/actualizando pip y dependencias desde Docs\requirements.txt..."
+Write-Host "Instalando/actualizando pip y dependencias desde documentos\requirements.txt..."
 & $pythonPath -m pip install --upgrade pip
 & $pythonPath -m pip install -r documentacion/requirements.txt
 

@@ -1,0 +1,318 @@
+:root {
+  color-scheme: dark;
+  --fondo-verde-oscuro:        #4B5A56;
+  --color-texto:        #d4d9d7;
+  --color-texto-suave:  rgba(255, 255, 255, 0.55);
+  --color-texto-tenue:  #9aaba6;
+  --color-label:        #7a8c88;
+  --color-titulo:       #e0e8e5;
+  --color-borde:        rgba(255, 255, 255, 0.1);
+  --color-borde-hover:  rgba(255, 255, 255, 0.3);
+  --fondo-verde-oscuro-input:  rgba(0, 0, 0, 0.22);
+  --color-card:         rgba(0, 0, 0, 0.18);
+  --color-btn-dark:     rgba(0, 0, 0, 0.18);
+  --blanco: #ffffff;
+}
+
+/* --- reseteado ---*/
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- base --- */
+body {
+  background-color: var(--fondo-verde-oscuro);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--color-texto);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- layout principal -- */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/*  --- footer --- */
+footer {
+  color: var(--color-texto-suave);
+  text-align: center;
+  padding: 1.2rem 2rem;
+  font-size: 0.8rem;
+  border-top: 1px solid var(--color-texto-suave);
+}
+
+/* --- nav --- */
+.nav {
+  padding: 0.8rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-secondary {
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: var(--color-btn-dark);
+  color: #c8d2cf;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: inherit;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.28);
+  color: #e8f0ed;
+}
+
+/* --- cards --- */
+.hero {
+  text-align: center;
+  padding: 3.5rem 2rem 2rem;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--color-titulo);
+  letter-spacing: -0.5px;
+  margin-bottom: 1.2rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--color-texto-tenue);
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   APP SECTION
+   ============================================================ */
+.app-section {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 2.5rem auto 3rem;
+  padding: 0 1.5rem;
+}
+
+/* ============================================================
+   CARD
+   ============================================================ */
+.glass-card {
+  padding: 3rem 3.5rem;
+  border-radius: 16px;
+  background: var(--color-card);
+  border: 1px solid var(--color-borde);
+}
+
+/* --- header --- */
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.form-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #c8d2cf;
+}
+
+.toggle-group {
+  display: flex;
+  padding: 3px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  gap: 2px;
+}
+
+.toggle-group button {
+  background: transparent;
+  border: none;
+  color: var(--color-label);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-family: inherit;
+  padding: 0.3rem 0.9rem;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.toggle-group button.active-tab {
+  background: rgba(255, 255, 255, 0.12);
+  color: #dde8e4;
+}
+
+/* --- grid inputs y lables --- */
+.grid-inputs {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.input-field label,
+.constraints-area label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.73rem;
+  color: var(--color-label);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.main-input,
+.select-input,
+.constraints-area textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 0.95rem;
+  color: var(--color-texto);
+  background: var(--fondo-verde-oscuro-input);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.25s;
+  resize: none;
+}
+
+.main-input:focus,
+.select-input:focus,
+.constraints-area textarea:focus {
+  border-color: var(--color-borde-hover);
+}
+
+.select-input option {
+  background: #3a4844;
+  color: var(--color-texto);
+}
+
+/* --- botones --- */
+.btn-primary {
+  width: 100%;
+  margin-top: 1.8rem;
+  padding: 1rem;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.88);
+  color: #2a3530;
+  font-weight: 600;
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-primary:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- modal error --- */
+.disclaimer {
+  margin-top: 0.9rem;
+  font-size: 0.73rem;
+  color: #617870;
+  text-align: center;
+}
+
+/* --- katex bloque --- */
+.katex-block {
+  margin-top: 1.4rem;
+  padding: 1.2rem 1.5rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.katex-block h4 {
+  margin: 0 0 0.8rem;
+  font-size: 0.72rem;
+  color: var(--color-label);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .hero {
+    padding: 2rem 1.2rem 1.2rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+    letter-spacing: -0.2px;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .app-section {
+    margin: 1.2rem auto 1.8rem;
+    padding: 0 0.75rem;
+  }
+
+  .glass-card {
+    padding: 1.6rem 1.2rem;
+  }
+
+  .form-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.9rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .grid-inputs {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 1rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .nav {
+    padding: 0.7rem 1rem;
+  }
+
+  .btn-secondary {
+    font-size: 0.76rem;
+    padding: 0.35rem 0.75rem;
+  }
+}
