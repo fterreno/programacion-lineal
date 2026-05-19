@@ -1,6 +1,9 @@
 import re
 from typing import List
 from entidades.funcion_objetivo import FuncionObjetivo
+from entidades.matriz import MatrizSimplex
+from entidades.metodo_tipo import MetodoTipo
+from entidades.problema import Problema
 from entidades.restriccion import Restriccion
 from entidades.termino import Termino
 from entidades.tipo import Tipo
@@ -60,3 +63,6 @@ def parsear_restricciones(texto: str) -> List[Restriccion]:
         for linea in texto.strip().splitlines()
         if linea.strip()
     ]
+
+def parsear_problema(metodo_tipo: str, funcion_objetivo: FuncionObjetivo, restricciones: List[Restriccion]) -> Problema:
+    return Problema(MetodoTipo[metodo_tipo], funcion_objetivo, restricciones)

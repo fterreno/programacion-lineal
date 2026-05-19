@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, render_template, request
 from entidades.tipo import Tipo
 from entidades.metodo_tipo import MetodoTipo
-from boundary.parsers.parser_pl import parsear_funcion_objetivo, parsear_restricciones
+from boundary.parsers.parser_pl import parsear_funcion_objetivo, parsear_restricciones, parsear_problema
 
 from controller.resolutor_pl import ResolutorPL
 
@@ -24,9 +24,9 @@ def resolver():
     if not all([funcion_objetivo, metodo_tipo, restricciones, tipo]):
         return {"error": "Todos los campos son obligatorios"}, 400
     else:
-        funcion_objetivo = parsear_funcion_objetivo(funcion_objetivo, tipo)
-        restricciones = parsear_restricciones(restricciones)
+        problema = parsear_problema(metodo_tipo, parsear_funcion_objetivo(funcion_objetivo, tipo), parsear_restricciones(restricciones))
 
-    ResolutorPL.resolver(funcion_objetivo, restricciones, metodo_tipo)
+    resolutor = ResolutorPL()
+    resolutor.resolver(problema)
 
     return jsonify({"message": "OK"}), 200

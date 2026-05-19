@@ -1,10 +1,10 @@
-from strategy.generador_pl import GeneradorPL
+from strategy.generador_metodo import GeneradorMetodo
 from entidades.respuesta import Respuesta
-from entidades.problema_pl import ProblemaPL
+from entidades.problema import Problema
 
-class MetodoSimplex(GeneradorPL):
+class MetodoSimplex(GeneradorMetodo):
 
-    def resolver(self, problema: ProblemaPL) -> Respuesta:
+    def resolver(self, problema: Problema) -> Respuesta:
         problema.validar()
         self.primera_fase(problema)  # Identificación de una solución factible básica.
         while not self.es_solucion(problema):
@@ -15,11 +15,11 @@ class MetodoSimplex(GeneradorPL):
         respuesta.problema_solucionado = problema
         return respuesta
 
-    def primera_fase(self, problema: ProblemaPL) -> None:
+    def primera_fase(self, problema: Problema) -> None:
         pass  # TODO: implementar
 
-    def segunda_fase(self, problema: ProblemaPL) -> None:
+    def segunda_fase(self, problema: Problema) -> None:
         pass  # TODO: implementar
 
-    def es_solucion(self, problema: ProblemaPL) -> bool:
+    def es_solucion(self, problema: Problema) -> bool:
         pass  # TODO: implementar

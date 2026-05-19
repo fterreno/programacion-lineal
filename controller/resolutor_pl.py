@@ -1,17 +1,21 @@
-from typing import Dict, List
-from entidades.funcion_objetivo import FuncionObjetivo
-from entidades.restriccion import Restriccion
+from entidades.problema import Problema
 from entidades.metodo_tipo import MetodoTipo
+from strategy.generador_base_artificial import MetodoBaseArtificial
+from strategy.generador_metodo import GeneradorMetodo
+from strategy.generador_simplex import MetodoSimplex
 
 class ResolutorPL:
 
-    def resolver(funcion_objetivo: FuncionObjetivo, restricciones: List[Restriccion], metodo_tipo: MetodoTipo):
-        
-        print(f"funcion_objetivo: tipo={funcion_objetivo.tipo}, terminos={[(t.coeficiente, t.variable, t.exponente) for t in funcion_objetivo.termino]}")
-        print(f"restricciones:")
-        for r in restricciones:
-            print(f"  {[(t.coeficiente, t.variable, t.exponente) for t in r.funcion_restricciones]} {r.operador} {r.valor_lado_derecho}")
-        print(f"metodo_tipo: {metodo_tipo}")
+    def __init__(self):
+        self.estrategias: dict[MetodoTipo, GeneradorMetodo] = {
+            MetodoTipo.SIMPLEX:         MetodoSimplex(),
+            MetodoTipo.BASE_ARTIFICIAL: MetodoBaseArtificial()
+        }
 
-        
-        pass
+    def resolver(self, problema: Problema):
+        estrategia = self.estrategias.get(problema.metodo_tipo)
+
+        if estrategia is None:
+            raise ValueError(f"Método no soportado: {problema.metodo_tipo}")
+
+        return estrategia.resolver(problema)
