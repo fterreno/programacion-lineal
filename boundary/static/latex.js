@@ -22,7 +22,7 @@ function actualizarKatex() {
 
     const latex = `
         \\begin{aligned}
-          &\\text{${tipo === 'MAX' ? 'Max' : 'Min'}}\\ Z = ${convertirAKaTeX(fo)} \\\\
+          &\\text{${document.querySelector('.toggle-group .active-tab')?.value === 'MAX' ? 'Max' : 'Min'}}\\ Z = ${convertirAKaTeX(fo)} \\\\
           ${lineas ? `&\\text{S.A.} \\\\ &\\begin{cases} ${lineas} \\end{cases}` : ''}
         \\end{aligned}
     `;

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block header %}
-    <button class="btn-secondary" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSda5dXlkqvtewRTXsjPikoAsJhq5dMxG7y5wezESgB0TfZoCA/viewform?usp=publish-editor', '_blank')">Formulario Errores</button>
+<button class="btn-secondary"
+    onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSda5dXlkqvtewRTXsjPikoAsJhq5dMxG7y5wezESgB0TfZoCA/viewform?usp=publish-editor', '_blank')">Formulario
+    Errores</button>
 {% endblock %}
 
 {% block contenido %}
@@ -16,48 +18,55 @@
 
 <section class="app-section">
     <div class="glass-card">
-
-        <div class="form-header">
-            <h3>Configuración del Modelo</h3>
-            <div class="toggle-group">
-                <button id="btn-max" class="active-tab" onclick="setTipo('MAX')">Maximizar</button>
-                <button id="btn-min" onclick="setTipo('MIN')">Minimizar</button>
-            </div>
-        </div>
-
-        <div class="grid-inputs">
-            <div class="input-field">
-                <label for="funcion-objetivo">Función Objetivo (Z)</label>
-                <input type="text" id="funcion-objetivo" placeholder="ej: 3x1 + 2x2" class="main-input"
-                    oninput="actualizarKatex()" />
-            </div>
-            <div class="input-field">
-                <label for="metodo-tipo">Método de Resolución</label>
-                <select id="metodo-tipo" class="select-input">
-                    <option value="SIMPLEX">Método Simplex</option>
-                    <option value="BASE_ARTIFICIAL">Base Artificial</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="constraints-area">
-            <label for="restricciones">Restricciones (Forma Explícita)</label>
-            <textarea id="restricciones" placeholder="ej: 2x1 + x2 <= 10&#10;x1 + 3x2 >= 15" rows="4"
-                oninput="actualizarKatex()"></textarea>
-        </div>
-
-        <div class="katex-block" id="katex-block" style="display: none;">
-            <h4>Función Objetivo</h4>
-            <div id="katex-output"></div>
-        </div>
-
-        <button class="btn-primary" id="btn-calcular" onclick="manejarEnvio()">
-            Calcular Solución Óptima
-        </button>
-
-        <p class="disclaimer">
-            * Si el modelo excede las 2 variables, el sistema omitirá la representación gráfica automáticamente.
-        </p>
+        <form action="/resolver" method="post">
+            
+                    <div class="form-header">
+                        <h3>Configuración del Modelo</h3>
+                        <div class="toggle-group">
+                            <input type="hidden" name="tipo" id="tipo-hidden" value="{{ tipos|first|attr('name') }}">
+                            {% for tipo in tipos %}
+                            <button type="button" id="btn-{{ tipo.name|lower }}" value="{{ tipo.name }}"
+                                onclick="setTipo('{{ tipo.name }}')"
+                                class="{% if loop.first %}active-tab{% endif %}">{{ tipo.value }}</button>
+                            {% endfor %}
+                        </div>
+                    </div>
+            
+                    <div class="grid-inputs">
+                        <div class="input-field">
+                            <label for="funcion-objetivo">Función Objetivo (Z)</label>
+                            <input type="text" name="funcion-objetivo" placeholder="ej: 3x1 + 2x2" class="main-input"
+                                oninput="actualizarKatex()" />
+                        </div>
+                        <div class="input-field">
+                            <label for="metodo-tipo">Método de Resolución</label>
+                            <select name="metodo-tipo" class="select-input">
+                                {% for metodo_tipo in metodos_tipos %}
+                                 <option value="{{ metodo_tipo.name }}">{{ metodo_tipo.value }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+            
+                    <div class="constraints-area">
+                        <label for="restricciones">Restricciones (Forma Explícita)</label>
+                        <textarea name="restricciones" placeholder="ej: 2x1 + x2 <= 10&#10;x1 + 3x2 >= 15" rows="4"
+                            oninput="actualizarKatex()"></textarea>
+                    </div>
+            
+                    <div class="katex-block" id="katex-block" style="display: none;">
+                        <h4>Función Objetivo</h4>
+                        <div id="katex-output"></div>
+                    </div>
+            
+                    <button class="btn-primary" id="btn-calcular" onclick="manejarEnvio()">
+                        Calcular Solución Óptima
+                    </button>
+            
+                    <p class="disclaimer">
+                        * Si el modelo excede las 2 variables, el sistema omitirá la representación gráfica automáticamente.
+                    </p>
+        </form>
     </div>
 </section>
 
@@ -66,7 +75,6 @@
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<script defer src="{{ url_for('static', filename='tipo_max_min.js') }}"></script>
+<script defer src="{{ url_for('static', filename='set_tipo.js') }}"></script>
 <script defer src="{{ url_for('static', filename='latex.js') }}"></script>
-<script defer src="{{ url_for('static', filename='envio_mensj.js') }}"></script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from typing import List
 from entidades.funcion_objetivo import FuncionObjetivo
-from entidades.retriccion import Restriccion
+from entidades.restriccion import Restriccion
 from entidades.matriz import MatrizSimplex
 
 class ProblemaPL:
