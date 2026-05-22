@@ -151,11 +151,11 @@ class Problema:
 
 
     def variable_entrada(self) -> None:
-        self.iteraciones[-1].variable_entrada(self.funcion_objetivo.tipo)
+        self.iteraciones[-1].calcular_variable_entrada(self.funcion_objetivo.tipo)
 
 
     def variable_salida(self) -> None:
-        self.iteraciones[-1].variable_salida()
+        self.iteraciones[-1].calcular_variable_salida()
 
 
     def actualizar_matriz(self) -> None:

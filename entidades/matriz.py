@@ -74,7 +74,7 @@ class Matriz:
 
     ## PASO 2 ------------------------------------------------------------------------------------------------
 
-    def variable_entrada(self, tipo: Tipo) -> None:
+    def calcular_variable_entrada(self, tipo: Tipo) -> None:
         posicion = -1
         condicion_entrada = 0.0
         for i, valor in enumerate(self.fila_cj_zj):
@@ -89,7 +89,7 @@ class Matriz:
         self.variable_entrada = self.fila_etiqueta[posicion]
 
 
-    def variable_salida(self) -> None:
+    def calcular_variable_salida(self) -> None:
         columna_pivote = self.fila_etiqueta.index(self.variable_entrada) if self.variable_entrada in self.fila_etiqueta else -1
         if columna_pivote == -1:
             raise ValueError(f"Error buscando la posicion de etiqueta en variable_salida: {self.variable_salida}")
