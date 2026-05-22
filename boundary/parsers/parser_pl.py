@@ -1,7 +1,7 @@
 import re
 from typing import List
 from entidades.funcion_objetivo import FuncionObjetivo
-from entidades.matriz import MatrizSimplex
+from entidades.matriz import Matriz
 from entidades.metodo_tipo import MetodoTipo
 from entidades.problema import Problema
 from entidades.restriccion import Restriccion
