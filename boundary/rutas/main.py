@@ -16,7 +16,7 @@ def index():
 @bp.route("/resolver", methods=["POST"])
 def resolver():
     funcion_objetivo = request.form.get("funcion-objetivo", "").strip()
-    restricciones = request.form.get("restricciones", "").strip()
+    restricciones = request.form.get("restricciones", "").strip() # se debe impedir cargar variables con s o a!!
     tipo = request.form.get("tipo", "").strip()
     metodo_tipo = request.form.get("metodo-tipo", "").strip()
     
@@ -28,5 +28,3 @@ def resolver():
 
     resolutor = ResolutorPL()
     resolutor.resolver(problema)
-
-    return jsonify({"message": "OK"}), 200

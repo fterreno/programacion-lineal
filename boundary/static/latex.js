@@ -9,8 +9,8 @@ function convertirAKaTeX(input) {
 }
 
 function actualizarKatex() {
-    const fo = document.getElementById('funcion-objetivo').value.trim();
-    const restricciones = document.getElementById('restricciones').value.trim();
+    const fo = document.querySelector('[name="funcion-objetivo"]').value.trim();
+    const restricciones = document.querySelector('[name="restricciones"]').value.trim();
     const bloque = document.getElementById('katex-block');
     const output = document.getElementById('katex-output');
 
