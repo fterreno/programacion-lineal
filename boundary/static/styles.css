@@ -778,6 +778,64 @@ footer {
 
 
 /* ═══════════════════════════════════════════════════════════════
+   PANEL DE EMPATE — aparece debajo del último tableau cuando hay
+   un empate en la variable de entrada o salida
+═══════════════════════════════════════════════════════════════ */
+.sol-empate {
+    margin-top: 1.2rem;
+    padding: 1.1rem 1.3rem;
+    border-radius: 12px;
+    border: 1px solid rgba(251, 191, 36, 0.28);
+    background: rgba(245, 158, 11, 0.07);
+}
+
+/* Texto descriptivo dentro del panel de empate */
+.sol-empate-label {
+    font-size: 0.82rem;
+    color: var(--pivote-texto);
+    margin: 0 0 0.8rem 0;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+/* Contenedor flex de los botones de candidatos */
+.sol-empate-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+/* Botón individual por cada variable candidata */
+.sol-empate-btn {
+    padding: 0.38rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--pivote-borde);
+    background: var(--color-btn-dark);
+    color: var(--pivote-texto);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: inherit;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+
+.sol-empate-btn:hover {
+    background: var(--pivote-bg);
+    border-color: rgba(245, 158, 11, 0.55);
+    color: #fde68a;
+}
+
+/* Estado activo tras seleccionar (aplicado por JS antes del POST) */
+.sol-empate-btn--activo {
+    background: var(--pivote-bg);
+    border-color: rgba(245, 158, 11, 0.55);
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
    ANIMACIONES — equivalentes a framer-motion del prototipo React
    Aplicadas por solucion.js al crear/recrear nodos del DOM
 ═══════════════════════════════════════════════════════════════ */

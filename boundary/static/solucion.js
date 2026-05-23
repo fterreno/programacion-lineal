@@ -12,6 +12,8 @@
     var _visibles = 1;         // modo sin gráfico: cuántas iteraciones mostrar
     var _vars = [];            // variables de decisión (no S, no A)
     var _conGrafico = false;
+    var _empate = null;        // objeto {tipo, candidatos} o null
+    var _elecciones = [];      // elecciones acumuladas hasta este momento
 
     /* ════════════════════════════════════════════
        UTILIDADES NUMÉRICAS
@@ -430,12 +432,75 @@
     }
 
     /* ════════════════════════════════════════════
+       PANEL DE EMPATE
+    ════════════════════════════════════════════ */
+    function construirEmpateUI() {
+        var div = document.createElement('div');
+        div.className = 'sol-empate anim-fade-scale';
+
+        var label = document.createElement('p');
+        label.className = 'sol-empate-label';
+        label.textContent = _empate.tipo === 'entrada'
+            ? 'Empate en variable de entrada — elegí cuál entra:'
+            : 'Empate en variable de salida — elegí cuál sale:';
+        div.appendChild(label);
+
+        var btns = document.createElement('div');
+        btns.className = 'sol-empate-btns';
+        _empate.candidatos.forEach(function (v) {
+            var btn = document.createElement('button');
+            btn.className = 'sol-empate-btn';
+            btn.textContent = v;
+            btn.addEventListener('click', function () {
+                btn.classList.add('sol-empate-btn--activo');
+                btn.disabled = true;
+                continuarConEleccion(v);
+            });
+            btns.appendChild(btn);
+        });
+        div.appendChild(btns);
+
+        return div;
+    }
+
+    function continuarConEleccion(variable) {
+        var fd = w.__FORM_DATA__;
+        var nuevasElecciones = _elecciones.concat([variable]);
+
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/resolver';
+        form.style.display = 'none';
+
+        var campos = {
+            'funcion-objetivo': fd['funcion-objetivo'],
+            'restricciones':    fd['restricciones'],
+            'tipo':             fd['tipo'],
+            'metodo-tipo':      fd['metodo-tipo'],
+            'elecciones':       JSON.stringify(nuevasElecciones)
+        };
+
+        Object.keys(campos).forEach(function (k) {
+            var input = document.createElement('input');
+            input.type  = 'hidden';
+            input.name  = k;
+            input.value = campos[k];
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+
+    /* ════════════════════════════════════════════
        LAYOUT CON GRÁFICO
     ════════════════════════════════════════════ */
     function renderConGrafico(root) {
         var iter    = _iteraciones[_indice];
         var esUlt   = _indice === _iteraciones.length - 1;
-        var esOpt   = esUlt && (iter.variable_entrada === null || iter.variable_entrada === undefined);
+        var esEmpateAqui = esUlt && _empate !== null;
+        var esOpt   = esUlt && !esEmpateAqui && (iter.variable_entrada === null || iter.variable_entrada === undefined);
         var z       = iter.columna_cb.reduce(function (s, cb, i) { return s + cb * iter.columna_vld[i]; }, 0);
         var bfs     = { x1: valorBFS('x1', iter), x2: valorBFS('x2', iter) };
 
@@ -455,6 +520,10 @@
             var opt = crearSeccionOptima(iter, z);
             opt.style.marginTop = '1.5rem';
             left.appendChild(opt);
+        }
+
+        if (esEmpateAqui) {
+            left.appendChild(construirEmpateUI());
         }
 
         /* botones prev/next */
@@ -521,14 +590,20 @@
         col.className = 'sol-matrices-col';
 
         _iteraciones.slice(0, _visibles).forEach(function (iter, i) {
-            var w = document.createElement('div');
-            w.className = 'anim-slide-down';
-            w.appendChild(construirTableau(iter, i, i === _iteraciones.length - 1));
-            col.appendChild(w);
+            var esUltIter = i === _iteraciones.length - 1;
+            var esOpt     = esUltIter && !_empate && (iter.variable_entrada === null || iter.variable_entrada === undefined);
+            var wrap = document.createElement('div');
+            wrap.className = 'anim-slide-down';
+            wrap.appendChild(construirTableau(iter, i, esOpt));
+            col.appendChild(wrap);
         });
 
         if (_visibles >= _iteraciones.length) {
-            col.appendChild(crearSeccionOptima(ultima, zOpt));
+            if (_empate) {
+                col.appendChild(construirEmpateUI());
+            } else {
+                col.appendChild(crearSeccionOptima(ultima, zOpt));
+            }
         } else {
             var hint = document.createElement('p');
             hint.className = 'sol-scroll-hint sol-scroll-hint--clickable';
@@ -551,10 +626,14 @@
        PUNTO DE ENTRADA
     ════════════════════════════════════════════ */
     function inicializar(data) {
+        _empate      = data.empate || null;
+        _elecciones  = (w.__FORM_DATA__ && w.__FORM_DATA__.elecciones) || [];
         _iteraciones = (data.problema_solucionado.iteraciones) || [];
         _restricciones = (data.problema_solucionado.restricciones) || [];
-        _indice   = 0;
-        _visibles = 1;
+        // Tras un empate re-suelto, abrir en la última iteración; en el primer submit, desde el inicio.
+        var esResubmit = _elecciones.length > 0;
+        _indice   = esResubmit ? _iteraciones.length - 1 : 0;
+        _visibles = esResubmit ? _iteraciones.length : 1;
         _vars = (_iteraciones.length > 0 ? _iteraciones[0].fila_etiqueta : []).filter(function (l) {
             return !l.startsWith('S') && !l.startsWith('A');
         });

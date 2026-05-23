@@ -2,8 +2,10 @@ import json
 from enum import Enum
 
 from flask import Blueprint, render_template, request
-from entidades.tipo import Tipo
+from entidades.contexto_resolucion import ContextoResolucion
+from entidades.empate import Empate
 from entidades.metodo_tipo import MetodoTipo
+from entidades.tipo import Tipo
 from boundary.parsers.parser_pl import parsear_funcion_objetivo, parsear_restricciones, parsear_problema
 from controller.resolutor_pl import ResolutorPL
 
@@ -28,12 +30,28 @@ def index():
 @bp.route("/resolver", methods=["POST"])
 def resolver():
     funcion_objetivo = request.form.get("funcion-objetivo", "").strip()
-    restricciones = request.form.get("restricciones", "").strip() # se debe impedir cargar variables con s o a!!
-    tipo = request.form.get("tipo", "").strip()
-    metodo_tipo = request.form.get("metodo-tipo", "").strip()
+    restricciones    = request.form.get("restricciones", "").strip()
+    tipo             = request.form.get("tipo", "").strip()
+    metodo_tipo      = request.form.get("metodo-tipo", "").strip()
+    elecciones_raw   = request.form.get("elecciones", "[]").strip()
 
     if not all([funcion_objetivo, metodo_tipo, restricciones, tipo]):
         return {"error": "Todos los campos son obligatorios"}, 400
+
+    try:
+        elecciones = json.loads(elecciones_raw) if elecciones_raw else []
+        if not isinstance(elecciones, list):
+            elecciones = []
+    except (json.JSONDecodeError, ValueError):
+        elecciones = []
+
+    form_data = {
+        "funcion-objetivo": funcion_objetivo,
+        "restricciones":    restricciones,
+        "tipo":             tipo,
+        "metodo-tipo":      metodo_tipo,
+        "elecciones":       elecciones,
+    }
 
     try:
         problema = parsear_problema(
@@ -41,9 +59,25 @@ def resolver():
             parsear_funcion_objetivo(funcion_objetivo, Tipo[tipo]),
             parsear_restricciones(restricciones)
         )
+        contexto  = ContextoResolucion(elecciones)
         resolutor = ResolutorPL()
-        respuesta = resolutor.resolver(problema)
+        resultado = resolutor.resolver(problema, contexto)
     except ValueError as e:
         return {"error": str(e)}, 422
 
-    return render_template("solucion.html", respuesta_json=json.dumps(_serializar(respuesta)))
+    if isinstance(resultado, Empate):
+        respuesta_dict = {
+            "empate":             _serializar(resultado),
+            "problema_solucionado": _serializar(problema),
+        }
+    else:
+        respuesta_dict = {
+            "empate":             None,
+            "problema_solucionado": _serializar(resultado.problema_solucionado),
+        }
+
+    return render_template(
+        "solucion.html",
+        respuesta_json=json.dumps(respuesta_dict),
+        form_data_json=json.dumps(form_data),
+    )

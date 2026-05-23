@@ -101,7 +101,7 @@ class Problema:
                 numero_a += 1
         self.funcion_objetivo.variables_holgura(nombres_holgura)
         self.funcion_objetivo.variables_artificiales(nombres_artificiales, self.funcion_objetivo.tipo)
-        todas_las_vars = self._obtener_todas_las_variables()
+        todas_las_vars = self.obtener_todas_las_variables()
 
 
         # Orden: variables originales → holguras/excesos (S) → artificiales (A)
@@ -158,28 +158,41 @@ class Problema:
         self.iteraciones[-1].calcular_variable_salida()
 
 
+    def candidatos_entrada(self) -> List[str]:
+        return self.iteraciones[-1].calcular_candidatos_entrada(self.funcion_objetivo.tipo)
+
+
+    def establecer_variable_entrada(self, variable: str) -> None:
+        self.iteraciones[-1].variable_entrada = variable
+
+
+    def candidatos_salida(self) -> List[str]:
+        return self.iteraciones[-1].calcular_candidatos_salida()
+
+
+    def establecer_variable_salida(self, variable: str) -> None:
+        self.iteraciones[-1].variable_salida = variable
+
+
     def actualizar_matriz(self) -> None:
         ultima = self.iteraciones[-1]
-        # Copiar fila_cj, etiquetas, columna_cb, columna_base, columna_vld
         nuevo_fila_cj       = list(ultima.fila_cj)
         nuevo_fila_etiqueta = list(ultima.fila_etiqueta)
         nuevo_columna_cb    = list(ultima.columna_cb)
         nuevo_columna_base  = list(ultima.columna_base)
         nuevo_columna_vld   = list(ultima.columna_vld)
-        # Copiar matriz de restricciones
         nueva_matriz = [fila[:] for fila in ultima.matriz_restricciones]
-        # Determinar posiciones pivote
+
         columna_pivote = nuevo_fila_etiqueta.index(ultima.variable_entrada)
-        fila_pivote = self.calcular_fila_pivote(columna_pivote, nueva_matriz, nuevo_columna_vld)
-        # Actualizar base
-        posicion_salida = nuevo_columna_base.index(ultima.variable_salida)
-        nuevo_columna_base[posicion_salida] = ultima.variable_entrada
-        nuevo_columna_cb[posicion_salida]   = ultima.fila_cj[columna_pivote]
-        # Normalizar fila pivote
+        fila_pivote = nuevo_columna_base.index(ultima.variable_salida)
+
+        nuevo_columna_base[fila_pivote] = ultima.variable_entrada
+        nuevo_columna_cb[fila_pivote]   = ultima.fila_cj[columna_pivote]
+
         pivote = nueva_matriz[fila_pivote][columna_pivote]
         nueva_matriz[fila_pivote] = [v / pivote for v in nueva_matriz[fila_pivote]]
         nuevo_columna_vld[fila_pivote] /= pivote
-        # Hacer ceros en columna pivote
+
         for i in range(len(nueva_matriz)):
             if i != fila_pivote:
                 factor = nueva_matriz[i][columna_pivote]
@@ -188,7 +201,7 @@ class Problema:
                     for j in range(len(nueva_matriz[0]))
                 ]
                 nuevo_columna_vld[i] -= factor * nuevo_columna_vld[fila_pivote]
-        # Crear y registrar la nueva MatrizSimplex
+
         nueva_matriz_simplex = Matriz(nuevo_fila_cj, nuevo_fila_etiqueta, nueva_matriz, None, None, nuevo_columna_cb, nuevo_columna_base, nuevo_columna_vld, None, None)
         nueva_matriz_simplex.calcular_solucion_coste()
         self.iteraciones.append(nueva_matriz_simplex)

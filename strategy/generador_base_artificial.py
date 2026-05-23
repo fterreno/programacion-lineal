@@ -1,35 +1,49 @@
+from typing import Optional, Union
+
+from entidades.contexto_resolucion import ContextoResolucion
+from entidades.empate import Empate, TipoEmpate
+from entidades.problema import Problema
+from entidades.respuesta import Respuesta
 from entidades.tipo import Tipo
 from strategy.generador_metodo import GeneradorMetodo
-from entidades.respuesta import Respuesta
-from entidades.problema import Problema
+
 
 class MetodoBaseArtificial(GeneradorMetodo):
 
-    TOLERANCIA: float = 1e-8  # Constante de clase, equivalente a static final
+    TOLERANCIA: float = 1e-8
 
-    def resolver(self, problema: Problema) -> Respuesta:
+    def resolver(self, problema: Problema, contexto: ContextoResolucion) -> Union[Respuesta, Empate]:
         problema.validar()
         self.primera_fase(problema)
         while not self.es_solucion(problema):
-            self.segunda_fase(problema)
+            empate = self.segunda_fase(problema, contexto)
+            if empate is not None:
+                return empate
         self.verificar_factibilidad(problema)
         respuesta = Respuesta()
         respuesta.mensaje = f"Método Base Artificial: {problema}"
         respuesta.problema_solucionado = problema
         return respuesta
 
-
     def primera_fase(self, problema: Problema) -> None:
-        # Construye la base inicial con variables artificiales en lugar de solo holguras
         problema.agregar_variables_artificiales()
         problema.generar_matriz_inicial()
 
+    def segunda_fase(self, problema: Problema, contexto: ContextoResolucion) -> Optional[Empate]:
+        candidatos_entrada = problema.candidatos_entrada()
+        eleccion_entrada = contexto.siguiente_eleccion(candidatos_entrada)
+        if eleccion_entrada is None:
+            return Empate(TipoEmpate.ENTRADA, candidatos_entrada)
+        problema.establecer_variable_entrada(eleccion_entrada)
 
-    def segunda_fase(self, problema: Problema) -> None:
-        problema.variable_entrada()
-        problema.variable_salida()
+        candidatos_salida = problema.candidatos_salida()
+        eleccion_salida = contexto.siguiente_eleccion(candidatos_salida)
+        if eleccion_salida is None:
+            return Empate(TipoEmpate.SALIDA, candidatos_salida)
+        
+        problema.establecer_variable_salida(eleccion_salida)
         problema.actualizar_matriz()
-
+        return None
 
     def es_solucion(self, problema: Problema) -> bool:
         ultima = problema.iteraciones[-1]
@@ -38,9 +52,7 @@ class MetodoBaseArtificial(GeneradorMetodo):
         else:
             return all(valor >= 0 for valor in ultima.fila_cj_zj)
 
-
     def verificar_factibilidad(self, problema: Problema) -> None:
-        # Si alguna variable artificial permanece en la base con valor > 0, el problema es infactible
         ultima = problema.iteraciones[-1]
         for i, var_base in enumerate(ultima.columna_base):
             valor = ultima.columna_vld[i]

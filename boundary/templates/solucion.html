@@ -15,7 +15,8 @@
 </div>
 
 <script>
-    window.__SOLUCION__ = {{ respuesta_json | safe }};
+    window.__SOLUCION__   = {{ respuesta_json | safe }};
+    window.__FORM_DATA__  = {{ form_data_json | safe }};
 </script>
 <script src="{{ url_for('static', filename='solucion.js') }}" defer></script>
 {% endblock %}
