@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block header %}
+<button class="btn-secondary btn-inicio" onclick="window.location.href='/'">&#8962; Inicio</button>
+{% endblock %}
+
+{% block contenido %}
+<div class="sol-page-header">
+    <h1 class="sol-title">Resolucion Programacion Lineal</h1>
+</div>
+<hr class="sol-separator">
+
+<div class="sol-main" id="sol-main">
+    <p class="sol-cargando">Cargando solución…</p>
+</div>
+
+<script>
+    window.__SOLUCION__ = {{ respuesta_json | safe }};
+</script>
+<script src="{{ url_for('static', filename='solucion.js') }}" defer></script>
+{% endblock %}

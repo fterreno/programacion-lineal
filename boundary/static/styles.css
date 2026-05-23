@@ -1,318 +1,913 @@
+/* ═══════════════════════════════════════════════════════════════
+   styles.css — Hoja de estilos global
+   Cubre: base, pagina-inicio, pagina de solución simplex
+═══════════════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════════════
+   VARIABLES GLOBALES
+   Todas las decisiones de color y superficie están aquí.
+   Ningún valor de color debe aparecer hardcodeado fuera de :root.
+═══════════════════════════════════════════════════════════════ */
 :root {
-  color-scheme: dark;
-  --fondo-verde-oscuro:        #4B5A56;
-  --color-texto:        #d4d9d7;
-  --color-texto-suave:  rgba(255, 255, 255, 0.55);
-  --color-texto-tenue:  #9aaba6;
-  --color-label:        #7a8c88;
-  --color-titulo:       #e0e8e5;
-  --color-borde:        rgba(255, 255, 255, 0.1);
-  --color-borde-hover:  rgba(255, 255, 255, 0.3);
-  --fondo-verde-oscuro-input:  rgba(0, 0, 0, 0.22);
-  --color-card:         rgba(0, 0, 0, 0.18);
-  --color-btn-dark:     rgba(0, 0, 0, 0.18);
-  --blanco: #ffffff;
+    color-scheme: dark;
+
+    /* --- Paleta de superficie ---------------------------------------- */
+    --fondo-app:           #4B5A56;              /* fondo de <body> */
+    --color-card:          rgba(0, 0, 0, 0.18);  /* tarjetas, glass-card */
+    --color-btn-dark:      rgba(0, 0, 0, 0.18);  /* fondo de botones secundarios */
+    --color-input-fondo:   rgba(0, 0, 0, 0.22);  /* fondo de inputs y textareas */
+    --capa-media:          rgba(0, 0, 0, 0.22);  /* fila Zj de la tabla simplex */
+    --capa-oscura:         rgba(0, 0, 0, 0.28);  /* thead tabla / fila Cj-Zj */
+
+    /* --- Tipografía -------------------------------------------------- */
+    --color-texto:         #d4d9d7;              /* texto de cuerpo principal */
+    --color-texto-suave:   rgba(255, 255, 255, 0.55); /* texto de footer / avisos */
+    --color-texto-tenue:   #9aaba6;              /* texto secundario, placeholders */
+    --color-label:         #7a8c88;              /* etiquetas de formulario en mayúsculas */
+    --color-titulo:        #e0e8e5;              /* headings h1-h3 */
+    --blanco:              #ffffff;
+
+    /* --- Bordes y divisores ------------------------------------------ */
+    --color-borde:         rgba(255, 255, 255, 0.1);  /* borde sutil en cards y nav */
+    --color-borde-hover:   rgba(255, 255, 255, 0.3);  /* borde al hacer hover */
+    --tabla-celda-borde:   rgba(255, 255, 255, 0.06); /* borde entre celdas del tableau */
+    --tabla-badge-bg:      rgba(255, 255, 255, 0.07); /* fondo del badge de iteración */
+
+    /* --- Semáforo del tableau simplex -------------------------------- */
+
+    /* Verde — columna/fila de la variable que ENTRA a la base */
+    --entrante-bg:         rgba(34, 197, 94, 0.13);
+    --entrante-borde:      rgba(34, 197, 94, 0.22);
+    --entrante-texto:      #4ade80;
+    --entrante-dot:        rgba(34, 197, 94, 0.75); /* dot en la leyenda de pivote */
+
+    /* Rojo — columna/fila de la variable que SALE de la base */
+    --saliente-bg:         rgba(239, 68, 68, 0.13);
+    --saliente-borde:      rgba(239, 68, 68, 0.22);
+    --saliente-texto:      #f87171;
+    --saliente-dot:        rgba(239, 68, 68, 0.75); /* dot en la leyenda de pivote */
+
+    /* Ámbar — celda de intersección (pivote) */
+    --pivote-bg:           rgba(245, 158, 11, 0.18);
+    --pivote-borde:        rgba(245, 158, 11, 0.32);
+    --pivote-texto:        #fbbf24;
+    --pivote-dot:          rgba(245, 158, 11, 0.75); /* dot en la leyenda de pivote */
+
+    /* --- Sección de solución óptima ---------------------------------- */
+    --optimo-bg:           rgba(34, 197, 94, 0.05);  /* fondo del bloque óptimo */
+    --optimo-borde:        rgba(34, 197, 94, 0.18);  /* borde del bloque óptimo */
+    --optimo-badge-bg:     rgba(34, 197, 94, 0.12);  /* fondo del badge "Óptimo" */
+    --optimo-badge-borde:  rgba(34, 197, 94, 0.28);  /* borde del badge "Óptimo" */
+    --optimo-texto:        #4ade80;                  /* texto verde del valor Z* y variables */
+    --optimo-item-bg:      rgba(255, 255, 255, 0.06);/* fondo de cada chip xi=valor */
 }
 
-/* --- reseteado ---*/
+
+/* ═══════════════════════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════════════════════ */
 *, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-/* --- base --- */
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE — body, main, footer
+   Usados en todos los templates que extienden base.html
+═══════════════════════════════════════════════════════════════ */
 body {
-  background-color: var(--fondo-verde-oscuro);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: var(--color-texto);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+    background-color: var(--fondo-app);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--color-texto);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* --- layout principal -- */
+/* <main> ocupa el espacio restante entre nav y footer */
 main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-/*  --- footer --- */
+/* Footer compartido por todas las páginas */
 footer {
-  color: var(--color-texto-suave);
-  text-align: center;
-  padding: 1.2rem 2rem;
-  font-size: 0.8rem;
-  border-top: 1px solid var(--color-texto-suave);
+    color: var(--color-texto-suave);
+    text-align: center;
+    padding: 1.2rem 2rem;
+    font-size: 0.8rem;
+    border-top: 1px solid var(--color-borde);
 }
 
-/* --- nav --- */
+
+/* ═══════════════════════════════════════════════════════════════
+   NAV — barra de navegación superior
+   Definida en base.html; se usa en pagina-inicio y solucion
+═══════════════════════════════════════════════════════════════ */
 .nav {
-  padding: 0.8rem 2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
+    padding: 0.8rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
 }
 
+/* Botón secundario genérico del nav (Documentación, Formulario Errores) */
 .btn-secondary {
-  padding: 0.4rem 1rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: var(--color-btn-dark);
-  color: #c8d2cf;
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-weight: 500;
-  font-family: inherit;
-  transition: background 0.2s, color 0.2s;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: var(--color-btn-dark);
+    color: #c8d2cf;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    font-family: inherit;
+    transition: background 0.2s, color 0.2s;
 }
 
 .btn-secondary:hover {
-  background: rgba(0, 0, 0, 0.28);
-  color: #e8f0ed;
+    background: rgba(0, 0, 0, 0.28);
+    color: #e8f0ed;
 }
 
-/* --- cards --- */
+/* Botón "⌂ Inicio" en la página de solución — empuja al extremo derecho */
+.btn-inicio {
+    margin-left: auto;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: var(--color-btn-dark);
+    color: #c8d2cf;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    font-family: inherit;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-inicio:hover {
+    background: rgba(0, 0, 0, 0.28);
+    color: #e8f0ed;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PÁGINA DE INICIO — hero y sección del formulario
+   Template: pagina-inicio.html
+═══════════════════════════════════════════════════════════════ */
+
+/* Bloque de presentación centrado sobre el formulario */
 .hero {
-  text-align: center;
-  padding: 3.5rem 2rem 2rem;
-  max-width: 860px;
-  margin: 0 auto;
+    text-align: center;
+    padding: 3.5rem 2rem 2rem;
+    max-width: 860px;
+    margin: 0 auto;
 }
 
 .title {
-  font-size: 2.6rem;
-  font-weight: 700;
-  color: var(--color-titulo);
-  letter-spacing: -0.5px;
-  margin-bottom: 1.2rem;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: var(--color-titulo);
+    letter-spacing: -0.5px;
+    margin-bottom: 1.2rem;
 }
 
 .subtitle {
-  font-size: 1rem;
-  line-height: 1.65;
-  color: var(--color-texto-tenue);
-  max-width: 680px;
-  margin: 0 auto;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--color-texto-tenue);
+    max-width: 680px;
+    margin: 0 auto;
 }
 
-/* ============================================================
-   APP SECTION
-   ============================================================ */
+/* Contenedor que centra y limita el ancho del formulario */
 .app-section {
-  flex: 1;
-  max-width: 900px;
-  width: 100%;
-  margin: 2.5rem auto 3rem;
-  padding: 0 1.5rem;
+    flex: 1;
+    max-width: 900px;
+    width: 100%;
+    margin: 2.5rem auto 3rem;
+    padding: 0 1.5rem;
 }
 
-/* ============================================================
-   CARD
-   ============================================================ */
+
+/* ═══════════════════════════════════════════════════════════════
+   GLASS CARD — tarjeta principal del formulario
+   Usada en pagina-inicio.html
+═══════════════════════════════════════════════════════════════ */
 .glass-card {
-  padding: 3rem 3.5rem;
-  border-radius: 16px;
-  background: var(--color-card);
-  border: 1px solid var(--color-borde);
+    padding: 3rem 3.5rem;
+    border-radius: 16px;
+    background: var(--color-card);
+    border: 1px solid var(--color-borde);
 }
 
-/* --- header --- */
+/* Encabezado interno: título + toggle MAX/MIN */
 .form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
 }
 
 .form-header h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #c8d2cf;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #c8d2cf;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   TOGGLE GROUP — selector MAX / MIN
+   Dentro del form-header en pagina-inicio.html
+═══════════════════════════════════════════════════════════════ */
 .toggle-group {
-  display: flex;
-  padding: 3px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.25);
-  gap: 2px;
+    display: flex;
+    padding: 3px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.25);
+    gap: 2px;
 }
 
 .toggle-group button {
-  background: transparent;
-  border: none;
-  color: var(--color-label);
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-family: inherit;
-  padding: 0.3rem 0.9rem;
-  border-radius: 6px;
-  transition: background 0.2s, color 0.2s;
+    background: transparent;
+    border: none;
+    color: var(--color-label);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-family: inherit;
+    padding: 0.3rem 0.9rem;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
 }
 
+/* Pestaña activa (activada por set_tipo.js) */
 .toggle-group button.active-tab {
-  background: rgba(255, 255, 255, 0.12);
-  color: #dde8e4;
+    background: rgba(255, 255, 255, 0.12);
+    color: #dde8e4;
 }
 
-/* --- grid inputs y lables --- */
+
+/* ═══════════════════════════════════════════════════════════════
+   CAMPOS DE FORMULARIO — inputs, select, textarea
+   Usados en pagina-inicio.html (función objetivo, restricciones)
+═══════════════════════════════════════════════════════════════ */
+
+/* Grid de dos columnas: función objetivo + selector de método */
 .grid-inputs {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
+/* Etiqueta en mayúsculas sobre cada campo */
 .input-field label,
 .constraints-area label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.73rem;
-  color: var(--color-label);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.73rem;
+    color: var(--color-label);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
 
+/* Estilos compartidos entre input, select y textarea */
 .main-input,
 .select-input,
 .constraints-area textarea {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  font-size: 0.95rem;
-  color: var(--color-texto);
-  background: var(--fondo-verde-oscuro-input);
-  border: 1px solid var(--color-borde);
-  border-radius: 8px;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.25s;
-  resize: none;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+    color: var(--color-texto);
+    background: var(--color-input-fondo);
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.25s;
+    resize: none;
 }
 
 .main-input:focus,
 .select-input:focus,
 .constraints-area textarea:focus {
-  border-color: var(--color-borde-hover);
+    border-color: var(--color-borde-hover);
 }
 
+/* Color de fondo de las opciones del select en navegadores que lo soportan */
 .select-input option {
-  background: #3a4844;
-  color: var(--color-texto);
+    background: #3a4844;
+    color: var(--color-texto);
 }
 
-/* --- botones --- */
+
+/* ═══════════════════════════════════════════════════════════════
+   BOTÓN PRIMARIO — "Calcular Solución Óptima"
+   Formulario de pagina-inicio.html
+═══════════════════════════════════════════════════════════════ */
 .btn-primary {
-  width: 100%;
-  margin-top: 1.8rem;
-  padding: 1rem;
-  border-radius: 10px;
-  border: none;
-  background: rgba(255, 255, 255, 0.88);
-  color: #2a3530;
-  font-weight: 600;
-  font-size: 0.95rem;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+    width: 100%;
+    margin-top: 1.8rem;
+    padding: 1rem;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255, 255, 255, 0.88);
+    color: #2a3530;
+    font-weight: 600;
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
 }
 
 .btn-primary:hover {
-  background: #ffffff;
-  transform: translateY(-1px);
+    background: var(--blanco);
+    transform: translateY(-1px);
 }
 
 .btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
-/* --- modal error --- */
-.disclaimer {
-  margin-top: 0.9rem;
-  font-size: 0.73rem;
-  color: #617870;
-  text-align: center;
-}
 
-/* --- katex bloque --- */
+/* ═══════════════════════════════════════════════════════════════
+   BLOQUE KATEX — preview de la función objetivo
+   Se muestra / oculta con latex.js en pagina-inicio.html
+═══════════════════════════════════════════════════════════════ */
 .katex-block {
-  margin-top: 1.4rem;
-  padding: 1.2rem 1.5rem;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+    margin-top: 1.4rem;
+    padding: 1.2rem 1.5rem;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .katex-block h4 {
-  margin: 0 0 0.8rem;
-  font-size: 0.72rem;
-  color: var(--color-label);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+    margin: 0 0 0.8rem;
+    font-size: 0.72rem;
+    color: var(--color-label);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width: 768px) {
-  .hero {
-    padding: 2rem 1.2rem 1.2rem;
-  }
-
-  .title {
-    font-size: 1.75rem;
-    letter-spacing: -0.2px;
-  }
-
-  .subtitle {
-    font-size: 0.9rem;
-  }
-
-  .app-section {
-    margin: 1.2rem auto 1.8rem;
-    padding: 0 0.75rem;
-  }
-
-  .glass-card {
-    padding: 1.6rem 1.2rem;
-  }
-
-  .form-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.9rem;
-    margin-bottom: 1.4rem;
-  }
-
-  .grid-inputs {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  footer {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.2rem;
-    padding: 1rem;
+/* Texto legal debajo del botón Calcular */
+.disclaimer {
+    margin-top: 0.9rem;
+    font-size: 0.73rem;
+    color: #617870;
     text-align: center;
-  }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   PÁGINA DE SOLUCIÓN — estructura general
+   Template: solucion.html
+═══════════════════════════════════════════════════════════════ */
+
+/* Título "Resolucion Programacion Lineal" */
+.sol-page-header {
+    padding: 2rem 2rem 0.5rem;
+    max-width: 1440px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.sol-title {
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: var(--color-titulo);
+    letter-spacing: -0.3px;
+}
+
+/* Línea divisoria bajo el título de la página de solución */
+.sol-separator {
+    border: none;
+    border-top: 1px solid var(--color-borde);
+    margin: 0.5rem 2rem 0;
+    max-width: calc(1440px - 4rem);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Contenedor raíz donde solucion.js inyecta el contenido dinámico */
+.sol-main {
+    flex: 1;
+    padding: 1.5rem 2rem 2.5rem;
+    max-width: 1440px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Texto visible mientras JS carga e inicializa */
+.sol-cargando {
+    color: var(--color-texto-tenue);
+    font-size: 0.9rem;
+    padding: 2rem 0;
+    text-align: center;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT CON GRÁFICO — cuando hay exactamente 2 variables
+   solucion.js genera esta estructura en .sol-main
+═══════════════════════════════════════════════════════════════ */
+
+/* Grid de dos columnas: tableau a la izquierda, gráfico a la derecha */
+.sol-split {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Columna izquierda con los tableaux (evita overflow horizontal) */
+.sol-scroll-area {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT SIN GRÁFICO — cuando hay más de 2 variables
+   solucion.js genera esta estructura en .sol-main
+═══════════════════════════════════════════════════════════════ */
+
+/* Columna centrada que acumula tableaux a medida que se revelan */
+.sol-single {
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.sol-matrices-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PANEL DEL GRÁFICO — columna derecha en layout con gráfico
+   Contiene el SVG de región factible generado por solucion.js
+═══════════════════════════════════════════════════════════════ */
+
+/* Sticky para que el gráfico acompañe el scroll de los tableaux */
+.sol-graph-panel {
+    position: sticky;
+    top: 1.2rem;
+    min-width: 0;
+}
+
+/* Tarjeta que envuelve el gráfico SVG */
+.sol-graph-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-borde);
+    border-radius: 14px;
+    padding: 1.2rem 1.2rem 0.8rem;
+    overflow: hidden;
+}
+
+/* Etiqueta "Región Factible" sobre el gráfico */
+.sol-graph-card h4 {
+    font-size: 0.73rem;
+    font-weight: 600;
+    color: var(--color-label);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 0.85rem;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   TARJETA DE TABLEAU — cada iteración del método simplex
+   solucion.js crea un .sol-tableau-card por iteración visible
+═══════════════════════════════════════════════════════════════ */
+.sol-tableau-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-borde);
+    border-radius: 14px;
+    padding: 1.4rem 1.6rem 1.2rem;
+    overflow: hidden;
+}
+
+/* Fila con badge de iteración + título h3 */
+.sol-tableau-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+}
+
+.sol-tableau-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-titulo);
+}
+
+/* Badge "Matriz Inicial" / "Iteración N" / "Óptimo" */
+.sol-iter-badge {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    background: var(--tabla-badge-bg);
+    color: var(--color-texto-tenue);
+    border: 1px solid var(--color-borde);
+}
+
+/* Variante verde cuando la iteración es la solución óptima */
+.sol-iter-badge--optima {
+    background: var(--optimo-badge-bg);
+    color: var(--optimo-texto);
+    border-color: var(--optimo-badge-borde);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   TABLA SIMPLEX — la matriz de pivoteo dentro de cada tableau
+═══════════════════════════════════════════════════════════════ */
+
+/* Scroll horizontal en pantallas pequeñas */
+.sol-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+}
+
+.sol-simplex-table {
+    border-collapse: collapse;
+    font-size: 0.81rem;
+    white-space: nowrap;
+    width: 100%;
+}
+
+/* Celdas base */
+.sol-simplex-table th,
+.sol-simplex-table td {
+    padding: 0.42rem 0.8rem;
+    text-align: center;
+    border: 1px solid var(--tabla-celda-borde);
+    color: var(--color-texto);
+}
+
+/* Encabezado: fila Cj y fila de etiquetas de variables */
+.sol-simplex-table thead th {
+    background: var(--capa-oscura);
+    color: var(--color-texto-tenue);
+    font-weight: 600;
+    font-size: 0.77rem;
+}
+
+/* Columnas CB, Base, VLD — identificadoras de cada fila */
+.sol-label-cell {
+    background: var(--color-card) !important;
+    color: var(--color-texto-tenue) !important;
+    font-weight: 500;
+}
+
+/* Fila Zj — suma ponderada de la base */
+.sol-zj-row td {
+    background: var(--capa-media);
+    border-top: 1px solid var(--color-borde);
+}
+
+/* Fila Cj−Zj — criterio de optimalidad */
+.sol-cjzj-row td {
+    background: var(--capa-oscura);
+    border-top: 1px solid var(--color-borde);
+    font-weight: 600;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SEMÁFORO DE PIVOTE — colores de la iteración actual
+   .cell-entering → columna de la variable que entra (verde)
+   .cell-leaving  → fila de la variable que sale (rojo)
+   .cell-pivot    → intersección de ambas (ámbar)
+═══════════════════════════════════════════════════════════════ */
+.cell-entering {
+    background: var(--entrante-bg)    !important;
+    color:      var(--entrante-texto) !important;
+    border-color: var(--entrante-borde) !important;
+}
+
+.cell-leaving {
+    background: var(--saliente-bg)    !important;
+    color:      var(--saliente-texto) !important;
+    border-color: var(--saliente-borde) !important;
+}
+
+.cell-pivot {
+    background: var(--pivote-bg)    !important;
+    color:      var(--pivote-texto) !important;
+    border-color: var(--pivote-borde) !important;
+    font-weight: 700;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   LEYENDA DE PIVOTE — barra inferior del tableau (no óptimo)
+   Muestra qué variable entra, sale y cuál es el pivote
+═══════════════════════════════════════════════════════════════ */
+.sol-pivot-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.1rem;
+    margin-top: 1rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--color-borde);
+}
+
+.sol-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.79rem;
+    color: var(--color-texto-tenue);
+}
+
+/* Círculo de color antes del nombre de cada variable */
+.sol-legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.sol-dot-green { background: var(--entrante-dot); }
+.sol-dot-red   { background: var(--saliente-dot); }
+.sol-dot-amber { background: var(--pivote-dot); }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SECCIÓN SOLUCIÓN ÓPTIMA — aparece tras la última iteración
+   Muestra el badge, el valor Z* y los valores de cada variable
+═══════════════════════════════════════════════════════════════ */
+.sol-optimal {
+    background: var(--optimo-bg);
+    border: 1px solid var(--optimo-borde);
+    border-radius: 14px;
+    padding: 1.5rem 1.6rem;
+    text-align: center;
+}
+
+/* Pill "SOLUCIÓN ÓPTIMA ENCONTRADA" */
+.sol-optimal-badge {
+    display: inline-block;
+    padding: 0.28rem 0.95rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: var(--optimo-badge-bg);
+    color: var(--optimo-texto);
+    border: 1px solid var(--optimo-badge-borde);
+    margin-bottom: 1rem;
+}
+
+/* "Z* = 32" en grande */
+.sol-optimal-z {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-titulo);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+/* Etiqueta "Z* =" en tamaño menor */
+.sol-optimal-z span {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-texto-tenue);
+}
+
+/* Fila de chips "x1 = 2 | x2 = 2 | ..." */
+.sol-bfs-values {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+    margin-top: 0.25rem;
+}
+
+/* Chip individual de cada variable de decisión */
+.sol-bfs-item {
+    font-size: 0.88rem;
+    color: var(--color-texto);
+    background: var(--optimo-item-bg);
+    padding: 0.32rem 0.85rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+}
+
+/* Nombre de la variable en verde */
+.sol-bfs-item strong {
+    color: var(--optimo-texto);
+    margin-right: 0.3rem;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVEGACIÓN DE ITERACIONES — botones Anterior / Siguiente
+   Visibles solo en el layout con gráfico (2 variables)
+═══════════════════════════════════════════════════════════════ */
+.sol-nav-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.2rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--color-borde);
+}
+
+/* Botón paso a paso "← Anterior" / "Siguiente →" */
+.sol-btn-step {
+    padding: 0.42rem 1.1rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+    background: var(--color-btn-dark);
+    color: var(--color-texto);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-family: inherit;
+    transition: background 0.18s, border-color 0.18s;
+}
+
+.sol-btn-step:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-borde-hover);
+}
+
+.sol-btn-step:disabled {
+    opacity: 0.32;
+    cursor: not-allowed;
+}
+
+/* "Iteración X de N" entre los botones / "Ver iteración X ↓" en modo stacked */
+.sol-scroll-hint {
+    font-size: 0.77rem;
+    color: var(--color-texto-tenue);
+    text-align: center;
+}
+
+/* Versión clickeable del hint (modo sin gráfico) */
+.sol-scroll-hint--clickable {
+    cursor: pointer;
+    transition: color 0.18s;
+    padding: 0.3rem 0;
+}
+
+.sol-scroll-hint--clickable:hover {
+    color: var(--color-texto);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMACIONES — equivalentes a framer-motion del prototipo React
+   Aplicadas por solucion.js al crear/recrear nodos del DOM
+═══════════════════════════════════════════════════════════════ */
+
+/* Tableau que aparece al avanzar (Siguiente →) */
+@keyframes sol-slide-down {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Tableau que aparece al retroceder (← Anterior) */
+@keyframes sol-slide-up {
+    from { opacity: 0; transform: translateY(-28px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Sección óptima — aparece con escala */
+@keyframes sol-fade-scale {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.anim-slide-down { animation: sol-slide-down 0.32s ease-out both; }
+.anim-slide-up   { animation: sol-slide-up   0.32s ease-out both; }
+.anim-fade-scale { animation: sol-fade-scale 0.35s ease-out 0.1s both; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════════ */
+
+/* Tablet — layout con gráfico pasa a columna única */
+@media (max-width: 960px) {
+    .sol-split {
+        grid-template-columns: 1fr;
+    }
+
+    .sol-graph-panel {
+        position: static;
+    }
+}
+
+/* Mobile — ajustes de pagina-inicio */
+@media (max-width: 768px) {
+    .hero {
+        padding: 2rem 1.2rem 1.2rem;
+    }
+
+    .title {
+        font-size: 1.75rem;
+        letter-spacing: -0.2px;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
+    }
+
+    .app-section {
+        margin: 1.2rem auto 1.8rem;
+        padding: 0 0.75rem;
+    }
+
+    .glass-card {
+        padding: 1.6rem 1.2rem;
+    }
+
+    .form-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.9rem;
+        margin-bottom: 1.4rem;
+    }
+
+    .grid-inputs {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+        padding: 1rem;
+        text-align: center;
+    }
+}
+
+/* Mobile — ajustes de pagina de solución */
+@media (max-width: 600px) {
+    .sol-page-header,
+    .sol-main {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .sol-separator {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .sol-title {
+        font-size: 1.2rem;
+    }
+
+    .sol-tableau-card {
+        padding: 1rem 0.9rem;
+    }
+
+    .sol-optimal-z {
+        font-size: 1.5rem;
+    }
+
+    .sol-nav-buttons {
+        gap: 0.6rem;
+    }
+}
+
+/* Mobile pequeño — nav y hero compactos */
 @media (max-width: 400px) {
-  .title {
-    font-size: 1.5rem;
-  }
+    .title {
+        font-size: 1.5rem;
+    }
 
-  .nav {
-    padding: 0.7rem 1rem;
-  }
+    .nav {
+        padding: 0.7rem 1rem;
+    }
 
-  .btn-secondary {
-    font-size: 0.76rem;
-    padding: 0.35rem 0.75rem;
-  }
+    .btn-secondary {
+        font-size: 0.76rem;
+        padding: 0.35rem 0.75rem;
+    }
 }
