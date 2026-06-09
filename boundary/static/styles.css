@@ -1,66 +1,86 @@
-/* ═══════════════════════════════════════════════════════════════
-   styles.css — Hoja de estilos global
-   Cubre: base, pagina-inicio, pagina de solución simplex
-═══════════════════════════════════════════════════════════════ */
-
-
-/* ═══════════════════════════════════════════════════════════════
-   VARIABLES GLOBALES
-   Todas las decisiones de color y superficie están aquí.
-   Ningún valor de color debe aparecer hardcodeado fuera de :root.
-═══════════════════════════════════════════════════════════════ */
 :root {
-    color-scheme: dark;
 
-    /* --- Paleta de superficie ---------------------------------------- */
-    --fondo-app:           #4B5A56;              /* fondo de <body> */
-    --color-card:          rgba(0, 0, 0, 0.18);  /* tarjetas, glass-card */
-    --color-btn-dark:      rgba(0, 0, 0, 0.18);  /* fondo de botones secundarios */
-    --color-input-fondo:   rgba(0, 0, 0, 0.22);  /* fondo de inputs y textareas */
-    --capa-media:          rgba(0, 0, 0, 0.22);  /* fila Zj de la tabla simplex */
-    --capa-oscura:         rgba(0, 0, 0, 0.28);  /* thead tabla / fila Cj-Zj */
+    /* --- Paleta principal -------------------------------------------- */
+    --navy:              #1B2A4A;             /* azul marino — fondo de header, sidebar, cjzj */
+    --navy-oscuro:       #142038;             /* navy más oscuro — hover, fondo de sidebar */
+    --cream:             #F5F1EB;             /* crema — fondo de <body> y secciones principales */
+    --cream-oscuro:      #EDE8DF;             /* crema oscuro — bordes, separadores, filas alternas */
+    --gold:              #C8A96E;             /* dorado — acento premium, reemplaza al verde */
+    --gold-claro:        rgba(200, 169, 110, 0.12); /* dorado muy transparente — fondos sutiles */
+    --gold-borde:        rgba(200, 169, 110, 0.38); /* dorado semitransparente — bordes de acento */
+    --blanco:            #ffffff;             /* blanco puro — superficie de cards y tablas */
 
-    /* --- Tipografía -------------------------------------------------- */
-    --color-texto:         #d4d9d7;              /* texto de cuerpo principal */
-    --color-texto-suave:   rgba(255, 255, 255, 0.55); /* texto de footer / avisos */
-    --color-texto-tenue:   #9aaba6;              /* texto secundario, placeholders */
-    --color-label:         #7a8c88;              /* etiquetas de formulario en mayúsculas */
-    --color-titulo:        #e0e8e5;              /* headings h1-h3 */
-    --blanco:              #ffffff;
+    /* --- Texto sobre fondos claros (cream, blanco) ------------------- */
+    --texto-principal:   #1B2A4A;             /* texto de cuerpo — navy para máximo contraste */
+    --texto-suave:       #4A5568;             /* texto secundario, párrafos de apoyo */
+    --texto-tenue:       #8A96A3;             /* texto terciario, placeholders, avisos */
+    --label-color:       #6B7280;             /* etiquetas en mayúsculas de los formularios */
+
+    /* --- Texto sobre fondos oscuros (navy, sidebar) ------------------ */
+    --texto-claro:       #E8E4DC;             /* texto principal en contextos navy */
+    --texto-claro-suave: rgba(232, 228, 220, 0.65);  /* texto secundario en navy */
+    --texto-claro-tenue: rgba(232, 228, 220, 0.38);  /* texto terciario en navy */
 
     /* --- Bordes y divisores ------------------------------------------ */
-    --color-borde:         rgba(255, 255, 255, 0.1);  /* borde sutil en cards y nav */
-    --color-borde-hover:   rgba(255, 255, 255, 0.3);  /* borde al hacer hover */
-    --tabla-celda-borde:   rgba(255, 255, 255, 0.06); /* borde entre celdas del tableau */
-    --tabla-badge-bg:      rgba(255, 255, 255, 0.07); /* fondo del badge de iteración */
+    --borde:             #DDD8CF;             /* borde estándar sobre cream */
+    --borde-suave:       #EDEAE4;             /* borde muy suave — divisores internos */
+    --borde-navy:        rgba(255, 255, 255, 0.10);  /* borde en contexto navy */
+    --borde-navy-hover:  rgba(255, 255, 255, 0.26);  /* borde navy en hover */
+
+    /* --- Superficies ------------------------------------------------- */
+    --fondo-app:         var(--cream);        /* fondo de <body> */
+    --fondo-card:        var(--blanco);       /* tarjetas sobre cream */
+    --fondo-input:       var(--cream);        /* fondo de inputs */
+    --fondo-input-foco:  var(--blanco);       /* fondo input con foco */
 
     /* --- Semáforo del tableau simplex -------------------------------- */
 
-    /* Verde — columna/fila de la variable que ENTRA a la base */
-    --entrante-bg:         rgba(34, 197, 94, 0.13);
-    --entrante-borde:      rgba(34, 197, 94, 0.22);
-    --entrante-texto:      #4ade80;
-    --entrante-dot:        rgba(34, 197, 94, 0.75); /* dot en la leyenda de pivote */
+    /* Crema suave — columna de la variable que ENTRA a la base */
+    --entrante-bg:       rgba(211, 199, 173, 0.4);
+    --entrante-borde:    rgba(77, 72, 63, 0.55);
+    --entrante-texto:    rgba(77, 72, 63);
+    --entrante-dot:      rgba(211, 199, 173);
 
-    /* Rojo — columna/fila de la variable que SALE de la base */
-    --saliente-bg:         rgba(239, 68, 68, 0.13);
-    --saliente-borde:      rgba(239, 68, 68, 0.22);
-    --saliente-texto:      #f87171;
-    --saliente-dot:        rgba(239, 68, 68, 0.75); /* dot en la leyenda de pivote */
+    /* Rojo — fila de la variable que SALE de la base */
+    --saliente-bg:       rgba(117, 68, 54, 0.3);
+    --saliente-borde:    rgba(117, 68, 54, 0.55);
+    --saliente-borde-izq:#3a221b;            /* border-left sólido en la primera celda de la fila */
+    --saliente-texto:    #3a221b;
+    --saliente-dot:      rgba(117, 68, 54);
 
-    /* Ámbar — celda de intersección (pivote) */
-    --pivote-bg:           rgba(245, 158, 11, 0.18);
-    --pivote-borde:        rgba(245, 158, 11, 0.32);
-    --pivote-texto:        #fbbf24;
-    --pivote-dot:          rgba(245, 158, 11, 0.75); /* dot en la leyenda de pivote */
+    /* Dorado intenso — celda pivote (intersección entrada × salida) */
+    --pivote-bg:         rgba(175, 110, 77, 0.425);
+    --pivote-borde:      rgba(126, 78, 55, 0.55);
+    --pivote-texto:      #7A5C10;
+    --pivote-dot:        rgba(175, 110, 77, 0.88);
 
     /* --- Sección de solución óptima ---------------------------------- */
-    --optimo-bg:           rgba(34, 197, 94, 0.05);  /* fondo del bloque óptimo */
-    --optimo-borde:        rgba(34, 197, 94, 0.18);  /* borde del bloque óptimo */
-    --optimo-badge-bg:     rgba(34, 197, 94, 0.12);  /* fondo del badge "Óptimo" */
-    --optimo-badge-borde:  rgba(34, 197, 94, 0.28);  /* borde del badge "Óptimo" */
-    --optimo-texto:        #4ade80;                  /* texto verde del valor Z* y variables */
-    --optimo-item-bg:      rgba(255, 255, 255, 0.06);/* fondo de cada chip xi=valor */
+    --optimo-bg:         rgba(200, 169, 110, 0.07);
+    --optimo-borde:      rgba(200, 169, 110, 0.25);
+    --optimo-badge-bg:   rgba(175, 110, 77, 0.10);  /* badge usa verde, no dorado */
+    --optimo-badge-borde:rgba(104, 65, 45, 0.28);
+    --optimo-texto:      #8B6914;             /* dorado oscuro — legible sobre cream */
+    --optimo-item-bg:    rgba(27, 42, 74, 0.05);
+
+         /* texto verde sobre cream, más oscuro */
+
+    /* --- Sidebar de iteraciones ------------------------------------- */
+    --sidebar-ancho:     224px;               /* ancho fijo del panel lateral */
+    --sidebar-fondo:     var(--cream-oscuro); /* fondo cream — mismo tono que el body */
+    --sidebar-borde:     var(--borde);        /* separador derecho estándar */
+    --nodo-activo-bg:    rgba(27, 42, 74, 0.07);  /* fondo del nodo activo — navy tenue */
+    --nodo-activo-borde: var(--gold);         /* borde izquierdo del nodo activo */
+    --nodo-hover-bg:     rgba(27, 42, 74, 0.04);  /* hover del nodo — navy muy suave */
+
+    /* --- Tabla simplex (tema claro) ---------------------------------- */
+    --tabla-thead-fondo: var(--navy);         /* encabezado de la tabla */
+    --tabla-thead-texto: var(--texto-claro);  /* texto en encabezado */
+    --tabla-label-fondo: var(--cream);        /* columnas identificadoras CB/Base/VLD */
+    --tabla-label-texto: var(--texto-suave);  /* texto de columnas identificadoras */
+    --tabla-zj-fondo:    var(--cream-oscuro); /* fila Zj */
+    --tabla-cjzj-fondo:  var(--navy);         /* fila Cj-Zj — misma que thead */
+    --tabla-cjzj-texto:  var(--texto-claro);  /* texto fila Cj-Zj */
+    --tabla-celda-borde: var(--borde-suave);  /* borde entre celdas */
 }
 
 
@@ -76,18 +96,18 @@
 
 /* ═══════════════════════════════════════════════════════════════
    BASE — body, main, footer
-   Usados en todos los templates que extienden base.html
+   Compartidos por todos los templates que extienden base.html
 ═══════════════════════════════════════════════════════════════ */
 body {
     background-color: var(--fondo-app);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    color: var(--color-texto);
+    color: var(--texto-principal);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-/* <main> ocupa el espacio restante entre nav y footer */
+/* <main> ocupa el espacio restante entre header y footer */
 main {
     flex: 1;
     display: flex;
@@ -96,62 +116,61 @@ main {
 
 /* Footer compartido por todas las páginas */
 footer {
-    color: var(--color-texto-suave);
+    color: var(--texto-tenue);
     text-align: center;
     padding: 1.2rem 2rem;
     font-size: 0.8rem;
-    border-top: 1px solid var(--color-borde);
+    border-top: 1px solid var(--borde);
+    background: var(--cream);
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   NAV — barra de navegación superior
+   HEADER / NAV — barra de navegación superior (navy)
    Definida en base.html; se usa en pagina-inicio y solucion
 ═══════════════════════════════════════════════════════════════ */
+
+/* <header> directo hijo de body — envuelve el <nav> con fondo navy */
+body > header {
+    background: var(--navy);
+    border-bottom: 1px solid rgba(200, 169, 110, 0.18); /* línea dorada sutil */
+    flex-shrink: 0;
+}
+
+/* Contenedor flex del nav — centra y limita el ancho máximo */
 .nav {
-    padding: 0.8rem 2rem;
+    padding: 0.85rem 2rem;
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 /* Botón secundario genérico del nav (Documentación, Formulario Errores) */
 .btn-secondary {
     padding: 0.4rem 1rem;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    background: var(--color-btn-dark);
-    color: #c8d2cf;
+    border-radius: 7px;
+    border: 1px solid var(--borde-navy);
+    background: transparent;
+    color: var(--texto-claro-suave);
     cursor: pointer;
     font-size: 0.82rem;
     font-weight: 500;
     font-family: inherit;
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .btn-secondary:hover {
-    background: rgba(0, 0, 0, 0.28);
-    color: #e8f0ed;
+    background: rgba(255, 255, 255, 0.09);
+    color: var(--texto-claro);
+    border-color: var(--borde-navy-hover);
 }
 
-/* Botón "⌂ Inicio" en la página de solución — empuja al extremo derecho */
+/* Botón "⌂ Inicio" en solucion.html — empuja al extremo derecho */
 .btn-inicio {
     margin-left: auto;
-    padding: 0.4rem 1rem;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    background: var(--color-btn-dark);
-    color: #c8d2cf;
-    cursor: pointer;
-    font-size: 0.82rem;
-    font-weight: 500;
-    font-family: inherit;
-    transition: background 0.2s, color 0.2s;
-}
-
-.btn-inicio:hover {
-    background: rgba(0, 0, 0, 0.28);
-    color: #e8f0ed;
 }
 
 
@@ -160,26 +179,34 @@ footer {
    Template: pagina-inicio.html
 ═══════════════════════════════════════════════════════════════ */
 
-/* Bloque de presentación centrado sobre el formulario */
+/* Hero: fondo cream, centrado, presenta la herramienta */
 .hero {
     text-align: center;
-    padding: 3.5rem 2rem 2rem;
+    padding: 4rem 2rem 2.5rem;
     max-width: 860px;
     margin: 0 auto;
 }
 
+/* Título principal — navy oscuro */
 .title {
-    font-size: 2.6rem;
+    font-size: 2.7rem;
     font-weight: 700;
-    color: var(--color-titulo);
+    color: var(--navy);
     letter-spacing: -0.5px;
     margin-bottom: 1.2rem;
+    line-height: 1.15;
 }
 
+/* La palabra "Programacion" en dorado para destacar el concepto clave */
+.title-accent {
+    color: var(--gold);
+}
+
+/* Subtítulo descriptivo — texto suave sobre cream */
 .subtitle {
     font-size: 1rem;
     line-height: 1.65;
-    color: var(--color-texto-tenue);
+    color: var(--texto-suave);
     max-width: 680px;
     margin: 0 auto;
 }
@@ -189,7 +216,7 @@ footer {
     flex: 1;
     max-width: 900px;
     width: 100%;
-    margin: 2.5rem auto 3rem;
+    margin: 2rem auto 3rem;
     padding: 0 1.5rem;
 }
 
@@ -201,8 +228,9 @@ footer {
 .glass-card {
     padding: 3rem 3.5rem;
     border-radius: 16px;
-    background: var(--color-card);
-    border: 1px solid var(--color-borde);
+    background: var(--fondo-card);
+    border: 1px solid var(--borde);
+    box-shadow: 0 2px 24px rgba(27, 42, 74, 0.07), 0 1px 4px rgba(27, 42, 74, 0.04);
 }
 
 /* Encabezado interno: título + toggle MAX/MIN */
@@ -211,12 +239,16 @@ footer {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--borde-suave);
 }
 
+/* Título "Configuración del Modelo" */
 .form-header h3 {
     font-size: 1rem;
     font-weight: 600;
-    color: #c8d2cf;
+    color: var(--navy);
+    letter-spacing: -0.1px;
 }
 
 
@@ -228,32 +260,35 @@ footer {
     display: flex;
     padding: 3px;
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--cream-oscuro);
     gap: 2px;
+    border: 1px solid var(--borde);
 }
 
 .toggle-group button {
     background: transparent;
     border: none;
-    color: var(--color-label);
+    color: var(--texto-tenue);
     cursor: pointer;
     font-size: 0.82rem;
     font-family: inherit;
-    padding: 0.3rem 0.9rem;
+    padding: 0.3rem 1rem;
     border-radius: 6px;
+    font-weight: 500;
     transition: background 0.2s, color 0.2s;
 }
 
-/* Pestaña activa (activada por set_tipo.js) */
+/* Pestaña activa (activada por set_tipo.js) — navy sobre cream */
 .toggle-group button.active-tab {
-    background: rgba(255, 255, 255, 0.12);
-    color: #dde8e4;
+    background: var(--navy);
+    color: var(--blanco);
+    font-weight: 600;
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
    CAMPOS DE FORMULARIO — inputs, select, textarea
-   Usados en pagina-inicio.html (función objetivo, restricciones)
+   Usados en pagina-inicio.html
 ═══════════════════════════════════════════════════════════════ */
 
 /* Grid de dos columnas: función objetivo + selector de método */
@@ -264,15 +299,16 @@ footer {
     margin-bottom: 1.5rem;
 }
 
-/* Etiqueta en mayúsculas sobre cada campo */
+/* Etiquetas en mayúsculas sobre cada campo */
 .input-field label,
 .constraints-area label {
     display: block;
     margin-bottom: 0.5rem;
-    font-size: 0.73rem;
-    color: var(--color-label);
+    font-size: 0.72rem;
+    color: var(--label-color);
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.9px;
+    font-weight: 600;
 }
 
 /* Estilos compartidos entre input, select y textarea */
@@ -282,26 +318,28 @@ footer {
     width: 100%;
     padding: 0.8rem 1rem;
     font-size: 0.95rem;
-    color: var(--color-texto);
-    background: var(--color-input-fondo);
-    border: 1px solid var(--color-borde);
+    color: var(--texto-principal);
+    background: var(--fondo-input);
+    border: 1px solid var(--borde);
     border-radius: 8px;
     font-family: inherit;
     outline: none;
-    transition: border-color 0.25s;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
     resize: none;
 }
 
 .main-input:focus,
 .select-input:focus,
 .constraints-area textarea:focus {
-    border-color: var(--color-borde-hover);
+    border-color: var(--gold);
+    background: var(--fondo-input-foco);
+    box-shadow: 0 0 0 3px rgba(200, 169, 110, 0.12);
 }
 
-/* Color de fondo de las opciones del select en navegadores que lo soportan */
+/* Color de opciones del select en navegadores compatibles */
 .select-input option {
-    background: #3a4844;
-    color: var(--color-texto);
+    background: var(--blanco);
+    color: var(--texto-principal);
 }
 
 
@@ -315,24 +353,27 @@ footer {
     padding: 1rem;
     border-radius: 10px;
     border: none;
-    background: rgba(255, 255, 255, 0.88);
-    color: #2a3530;
+    background: var(--navy);
+    color: var(--blanco);
     font-weight: 600;
     font-size: 0.95rem;
     font-family: inherit;
     cursor: pointer;
-    transition: background 0.2s, transform 0.15s;
+    letter-spacing: 0.01em;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
 }
 
 .btn-primary:hover {
-    background: var(--blanco);
+    background: var(--navy-oscuro);
     transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(27, 42, 74, 0.18);
 }
 
 .btn-primary:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
 
@@ -344,23 +385,24 @@ footer {
     margin-top: 1.4rem;
     padding: 1.2rem 1.5rem;
     border-radius: 10px;
-    background: rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: var(--cream);
+    border: 1px solid var(--borde);
 }
 
 .katex-block h4 {
     margin: 0 0 0.8rem;
     font-size: 0.72rem;
-    color: var(--color-label);
+    color: var(--label-color);
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.9px;
+    font-weight: 600;
 }
 
 /* Texto legal debajo del botón Calcular */
 .disclaimer {
     margin-top: 0.9rem;
     font-size: 0.73rem;
-    color: #617870;
+    color: var(--texto-tenue);
     text-align: center;
 }
 
@@ -370,82 +412,290 @@ footer {
    Template: solucion.html
 ═══════════════════════════════════════════════════════════════ */
 
-/* Título "Resolucion Programacion Lineal" */
+/*
+ * Cabecera de la página de solución.
+ * Usa el mismo grid de columnas que el layout principal para que
+ * la franja izquierda (::before) se alinee visualmente con el sidebar
+ * y no haya choque de colores entre ambos elementos.
+ */
 .sol-page-header {
-    padding: 2rem 2rem 0.5rem;
-    max-width: 1440px;
-    margin: 0 auto;
-    width: 100%;
+    display: grid;
+    grid-template-columns: var(--sidebar-ancho) 1fr;
+    padding: 0;
+    background: transparent;
 }
 
+/* Franja izquierda — mismo color y borde que el sidebar */
+.sol-page-header::before {
+    content: '';
+    background: var(--cream-oscuro);
+    border-right: 1px solid var(--borde);
+}
+
+/* Título en la columna derecha — separado visualmente del sidebar */
 .sol-title {
-    font-size: 1.55rem;
+    padding: 1.4rem 2rem 1rem;
+    font-size: 1.45rem;
     font-weight: 700;
-    color: var(--color-titulo);
+    color: var(--navy);
     letter-spacing: -0.3px;
 }
 
-/* Línea divisoria bajo el título de la página de solución */
+/* La palabra "Programacion" en dorado también en la página de solución */
+.sol-title-accent {
+    color: var(--gold);
+}
+
+/* Línea divisoria bajo el título — cubre ambas columnas */
 .sol-separator {
     border: none;
-    border-top: 1px solid var(--color-borde);
-    margin: 0.5rem 2rem 0;
-    max-width: calc(1440px - 4rem);
-    margin-left: auto;
-    margin-right: auto;
+    border-top: 1px solid var(--borde);
+    margin: 0;
 }
 
 /* Contenedor raíz donde solucion.js inyecta el contenido dinámico */
 .sol-main {
     flex: 1;
-    padding: 1.5rem 2rem 2.5rem;
-    max-width: 1440px;
-    margin: 0 auto;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
 }
 
-/* Texto visible mientras JS carga e inicializa */
+/* Texto visible mientras JS carga */
 .sol-cargando {
-    color: var(--color-texto-tenue);
+    color: var(--texto-tenue);
     font-size: 0.9rem;
-    padding: 2rem 0;
+    padding: 3rem 2rem;
     text-align: center;
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   LAYOUT CON GRÁFICO — cuando hay exactamente 2 variables
-   solucion.js genera esta estructura en .sol-main
+   LAYOUT CON SIDEBAR — estructura raíz generada por solucion.js
+   .sol-with-sidebar es la clase base para el grid
+   .sol-with-graph agrega la columna del gráfico (2 variables)
 ═══════════════════════════════════════════════════════════════ */
 
-/* Grid de dos columnas: tableau a la izquierda, gráfico a la derecha */
-.sol-split {
+/* Grid de 2 columnas: sidebar + área de contenido */
+.sol-with-sidebar {
     display: grid;
-    grid-template-columns: 1fr 420px;
-    gap: 1.5rem;
-    align-items: start;
+    grid-template-columns: var(--sidebar-ancho) 1fr;
+    grid-template-rows: minmax(min-content, 1fr); /* la única fila llena el contenedor */
+    align-items: stretch; /* todas las columnas se estiran al alto del grid */
+    flex: 1;              /* ocupa el espacio restante de .sol-main */
+    min-height: 0;        /* evita overflow en contexto flex */
 }
 
-/* Columna izquierda con los tableaux (evita overflow horizontal) */
+/* Variante de 3 columnas cuando hay gráfico (exactamente 2 variables) */
+.sol-with-sidebar.sol-with-graph {
+    grid-template-columns: var(--sidebar-ancho) 1fr 420px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SIDEBAR DE ITERACIONES — panel lateral navy (primera columna)
+   Generado por solucion.js; permite navegar entre iteraciones
+═══════════════════════════════════════════════════════════════ */
+
+/* Contenedor externo: fondo navy que se estira al alto del grid */
+.sol-iter-sidebar {
+    background: var(--sidebar-fondo);
+    border-right: 1px solid var(--sidebar-borde);
+    align-self: stretch; /* se estira para cubrir todo el alto de la columna */
+}
+
+/* Contenedor interno con posicionamiento sticky: se mantiene visible al hacer scroll */
+.sol-sidebar-inner {
+    position: sticky;
+    top: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 1.5rem 0;
+}
+
+/* Título del panel lateral (ej: "ITERACIONES") */
+.sol-sidebar-title {
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: var(--label-color);
+    padding: 0 1.2rem 0.9rem;
+    border-bottom: 1px solid var(--borde);
+    margin-bottom: 0.4rem;
+}
+
+/* Nodo individual de iteración en el sidebar */
+.sol-iter-node {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: background 0.18s, border-color 0.18s;
+}
+
+.sol-iter-node:hover {
+    background: var(--nodo-hover-bg);
+}
+
+/* Nodo activo — la iteración actualmente visible en pantalla */
+.sol-iter-node--active {
+    background: var(--nodo-activo-bg);
+    border-left-color: var(--nodo-activo-borde);
+}
+
+/* Nodo correspondiente a la matriz inicial — dot ligeramente cuadrado */
+.sol-iter-node--inicial .sol-node-dot {
+    border-radius: 5px;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    background: var(--blanco);
+    border-color: var(--borde);
+    color: var(--texto-tenue);
+}
+
+/* Nodo de iteraciones futuras aún no reveladas (modo sin gráfico) */
+.sol-iter-node--future {
+    opacity: 0.38;
+}
+
+.sol-iter-node--future:hover {
+    opacity: 0.65;
+}
+
+/* Círculo numerado del nodo — muestra el índice de la iteración */
+.sol-node-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--borde);
+    background: var(--blanco);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: var(--texto-suave);
+    flex-shrink: 0;
+    transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+
+/* Dot del nodo activo — dorado */
+.sol-iter-node--active .sol-node-dot {
+    background: var(--gold-borde);
+    border-color: var(--gold);
+    color: var(--navy);
+}
+
+/* Dot del nodo óptimo — gold (prevalece sobre el activo por orden en el archivo) */
+.sol-iter-node--optima .sol-node-dot {
+    background: var(--gold-borde);
+    border-color: var(--gold);
+    color: var(--navy);
+    font-size: 0.85rem;
+}
+
+/* Etiqueta de texto del nodo ("Inicial", "Iteración 1", "Óptimo") */
+.sol-node-label {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.18s;
+}
+
+.sol-iter-node--active .sol-node-label {
+    color: var(--navy);
+    font-weight: 600;
+}
+
+/* Etiqueta del nodo óptimo en verde */
+.sol-iter-node--optima .sol-node-label {
+    color: var(--gold);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PANEL DE RESUMEN — aparece al pie del sidebar cuando hay solución
+   Muestra: estado óptimo, nº de iteraciones, Z* y valores de xi
+═══════════════════════════════════════════════════════════════ */
+.sol-sidebar-summary {
+    margin: 0.85rem 0 0;
+    padding: 0.9rem 1.2rem 1.2rem;
+    border-top: 1px solid var(--borde);
+}
+
+/* Línea de estado: "✓ Solución Óptima" en verde */
+.sol-sidebar-summary-estado {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 0.9rem;
+}
+
+/* Etiqueta de categoría (ITERACIONES, Z*, VARIABLES) */
+.sol-sidebar-summary-label {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--label-color);
+    margin: 0.6rem 0 0.15rem;
+}
+
+/* Valor de la categoría */
+.sol-sidebar-summary-value {
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--navy);
+}
+
+/* Contenedor de los chips de variables */
+.sol-sidebar-summary-vars {
+    margin-top: 0.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.22rem;
+}
+
+/* Chip individual "xi = valor" */
+.sol-sidebar-summary-var {
+    font-size: 0.78rem;
+    color: var(--texto-suave);
+}
+
+/* Nombre de la variable en dorado dentro del chip */
+.sol-sidebar-summary-var strong {
+    color: var(--gold);
+    margin-right: 0.25rem;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ÁREA DE CONTENIDO — segunda columna del grid
+   .sol-scroll-area: modo con gráfico (un tableau a la vez)
+   .sol-matrices-col: modo sin gráfico (tableaux apilados)
+═══════════════════════════════════════════════════════════════ */
+
+/* Columna central en modo con gráfico — tableau único */
 .sol-scroll-area {
     min-width: 0;
+    padding: 1.6rem 1.8rem 2.5rem;
     display: flex;
     flex-direction: column;
+    gap: 1.5rem;
 }
 
-
-/* ═══════════════════════════════════════════════════════════════
-   LAYOUT SIN GRÁFICO — cuando hay más de 2 variables
-   solucion.js genera esta estructura en .sol-main
-═══════════════════════════════════════════════════════════════ */
-
-/* Columna centrada que acumula tableaux a medida que se revelan */
-.sol-single {
-    max-width: 960px;
-    margin: 0 auto;
-}
-
+/* Columna central en modo sin gráfico — tableaux apilados */
 .sol-matrices-col {
+    min-width: 0;
+    padding: 1.6rem 1.8rem 2.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -453,34 +703,76 @@ footer {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   PANEL DEL GRÁFICO — columna derecha en layout con gráfico
+   PANEL DEL GRÁFICO — tercera columna en modo con gráfico
    Contiene el SVG de región factible generado por solucion.js
 ═══════════════════════════════════════════════════════════════ */
 
-/* Sticky para que el gráfico acompañe el scroll de los tableaux */
+/* Sticky para que el gráfico acompañe el scroll de la columna central */
 .sol-graph-panel {
     position: sticky;
     top: 1.2rem;
     min-width: 0;
+    padding: 1.5rem 1.5rem 1.5rem 0.25rem;
+    align-self: start;
 }
 
-/* Tarjeta que envuelve el gráfico SVG */
+/* Tarjeta contenedora del gráfico SVG */
 .sol-graph-card {
-    background: var(--color-card);
-    border: 1px solid var(--color-borde);
+    background: var(--fondo-card);
+    border: 1px solid var(--borde);
     border-radius: 14px;
     padding: 1.2rem 1.2rem 0.8rem;
     overflow: hidden;
+    box-shadow: 0 2px 12px rgba(27, 42, 74, 0.06);
 }
 
-/* Etiqueta "Región Factible" sobre el gráfico */
-.sol-graph-card h4 {
-    font-size: 0.73rem;
-    font-weight: 600;
-    color: var(--color-label);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
+/* Wrapper del header del gráfico: título + leyenda de restricciones */
+.sol-graph-header {
     margin-bottom: 0.85rem;
+}
+
+/* Etiqueta "Región Factible" */
+.sol-graph-card h4 {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--label-color);
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    margin-bottom: 0.5rem; /* reducido para dar espacio a la leyenda */
+}
+
+/* Leyenda de restricciones en el header del gráfico */
+.sol-graph-constraint-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.7rem;
+}
+
+/* Item de la leyenda: línea de color + etiqueta */
+.sol-graph-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    color: var(--texto-suave);
+}
+
+/* Segmento de línea de color sólido (restricciones) */
+.sol-graph-legend-line {
+    display: inline-block;
+    width: 15px;
+    height: 2.5px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* Segmento dorado discontinuo para la función objetivo Z* */
+.sol-graph-legend-line--dashed {
+    background: none;
+    height: 0;
+    border-top: 2.5px dashed var(--gold);
+    width: 15px;
+    margin-top: 1px;
 }
 
 
@@ -489,11 +781,12 @@ footer {
    solucion.js crea un .sol-tableau-card por iteración visible
 ═══════════════════════════════════════════════════════════════ */
 .sol-tableau-card {
-    background: var(--color-card);
-    border: 1px solid var(--color-borde);
+    background: var(--fondo-card);
+    border: 1px solid var(--borde);
     border-radius: 14px;
     padding: 1.4rem 1.6rem 1.2rem;
     overflow: hidden;
+    box-shadow: 0 1px 8px rgba(27, 42, 74, 0.05);
 }
 
 /* Fila con badge de iteración + título h3 */
@@ -504,13 +797,7 @@ footer {
     margin-bottom: 1.1rem;
 }
 
-.sol-tableau-header h3 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--color-titulo);
-}
-
-/* Badge "Matriz Inicial" / "Iteración N" / "Óptimo" */
+/* Badge "Matriz Inicial" / "Iteración N" */
 .sol-iter-badge {
     display: inline-block;
     padding: 0.2rem 0.65rem;
@@ -519,12 +806,12 @@ footer {
     font-weight: 600;
     letter-spacing: 0.5px;
     white-space: nowrap;
-    background: var(--tabla-badge-bg);
-    color: var(--color-texto-tenue);
-    border: 1px solid var(--color-borde);
+    background: var(--cream-oscuro);
+    color: var(--texto-tenue);
+    border: 1px solid var(--borde);
 }
 
-/* Variante verde cuando la iteración es la solución óptima */
+/* Variante dorada cuando la iteración es la solución óptima */
 .sol-iter-badge--optima {
     background: var(--optimo-badge-bg);
     color: var(--optimo-texto);
@@ -534,6 +821,7 @@ footer {
 
 /* ═══════════════════════════════════════════════════════════════
    TABLA SIMPLEX — la matriz de pivoteo dentro de cada tableau
+   Tema claro: cream y blanco en lugar del gris oscuro anterior
 ═══════════════════════════════════════════════════════════════ */
 
 /* Scroll horizontal en pantallas pequeñas */
@@ -541,7 +829,7 @@ footer {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     border-radius: 8px;
-    border: 1px solid var(--color-borde);
+    border: 1px solid var(--borde);
 }
 
 .sol-simplex-table {
@@ -551,65 +839,74 @@ footer {
     width: 100%;
 }
 
-/* Celdas base */
+/* Celdas base — fondo blanco, texto navy */
 .sol-simplex-table th,
 .sol-simplex-table td {
-    padding: 0.42rem 0.8rem;
+    padding: 0.42rem 0.85rem;
     text-align: center;
     border: 1px solid var(--tabla-celda-borde);
-    color: var(--color-texto);
+    color: var(--texto-principal);
+    background: var(--blanco);
 }
 
-/* Encabezado: fila Cj y fila de etiquetas de variables */
+/* Encabezado: fila Cj y fila de etiquetas de variables — navy */
 .sol-simplex-table thead th {
-    background: var(--capa-oscura);
-    color: var(--color-texto-tenue);
+    background: var(--tabla-thead-fondo);
+    color: var(--tabla-thead-texto);
     font-weight: 600;
     font-size: 0.77rem;
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Columnas CB, Base, VLD — identificadoras de cada fila */
+/* Columnas CB, Base, VLD — identificadoras de cada fila — cream */
 .sol-label-cell {
-    background: var(--color-card) !important;
-    color: var(--color-texto-tenue) !important;
+    background: var(--tabla-label-fondo) !important;
+    color: var(--tabla-label-texto) !important;
     font-weight: 500;
 }
 
-/* Fila Zj — suma ponderada de la base */
+/* Fila Zj — suma ponderada de la base — cream oscuro */
 .sol-zj-row td {
-    background: var(--capa-media);
-    border-top: 1px solid var(--color-borde);
+    background: var(--cream);
+    border-top: 1px solid var(--borde);
 }
 
-/* Fila Cj−Zj — criterio de optimalidad */
+/* Fila Cj−Zj — criterio de optimalidad — navy (igual que thead) */
 .sol-cjzj-row td {
-    background: var(--capa-oscura);
-    border-top: 1px solid var(--color-borde);
+    background: var(--tabla-cjzj-fondo);
+    color: var(--tabla-cjzj-texto);
+    border-top: 1px solid var(--borde);
     font-weight: 600;
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   SEMÁFORO DE PIVOTE — colores de la iteración actual
-   .cell-entering → columna de la variable que entra (verde)
-   .cell-leaving  → fila de la variable que sale (rojo)
-   .cell-pivot    → intersección de ambas (ámbar)
+   SEMÁFORO DE PIVOTE — colores por rol en la iteración
+   .cell-entering → columna variable que entra (dorado suave)
+   .cell-leaving  → fila variable que sale (rojo + border-left)
+   .cell-pivot    → celda intersección (dorado intenso)
 ═══════════════════════════════════════════════════════════════ */
 .cell-entering {
-    background: var(--entrante-bg)    !important;
-    color:      var(--entrante-texto) !important;
+    background:   var(--entrante-bg)    !important;
+    color:        var(--entrante-texto) !important;
     border-color: var(--entrante-borde) !important;
 }
 
 .cell-leaving {
-    background: var(--saliente-bg)    !important;
-    color:      var(--saliente-texto) !important;
+    background:   var(--saliente-bg)    !important;
+    color:        var(--saliente-texto) !important;
     border-color: var(--saliente-borde) !important;
 }
 
+/* Primera celda de la fila saliente recibe el border-left rojo sólido */
+.sol-simplex-table tr td.cell-leaving:first-child,
+.sol-simplex-table tr td.sol-label-cell.cell-leaving:first-child {
+    border-left: 3px solid var(--saliente-borde-izq) !important;
+}
+
 .cell-pivot {
-    background: var(--pivote-bg)    !important;
-    color:      var(--pivote-texto) !important;
+    background:   var(--pivote-bg)    !important;
+    color:        var(--pivote-texto) !important;
     border-color: var(--pivote-borde) !important;
     font-weight: 700;
 }
@@ -625,7 +922,7 @@ footer {
     gap: 0.5rem 1.1rem;
     margin-top: 1rem;
     padding-top: 0.8rem;
-    border-top: 1px solid var(--color-borde);
+    border-top: 1px solid var(--borde-suave);
 }
 
 .sol-legend-item {
@@ -633,10 +930,10 @@ footer {
     align-items: center;
     gap: 0.4rem;
     font-size: 0.79rem;
-    color: var(--color-texto-tenue);
+    color: var(--texto-suave);
 }
 
-/* Círculo de color antes del nombre de cada variable */
+/* Círculo de color antes del nombre de la variable */
 .sol-legend-dot {
     width: 9px;
     height: 9px;
@@ -680,7 +977,7 @@ footer {
 .sol-optimal-z {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--color-titulo);
+    color: var(--navy);
     margin-bottom: 1rem;
     display: flex;
     align-items: baseline;
@@ -692,7 +989,7 @@ footer {
 .sol-optimal-z span {
     font-size: 1rem;
     font-weight: 500;
-    color: var(--color-texto-tenue);
+    color: var(--texto-suave);
 }
 
 /* Fila de chips "x1 = 2 | x2 = 2 | ..." */
@@ -707,14 +1004,14 @@ footer {
 /* Chip individual de cada variable de decisión */
 .sol-bfs-item {
     font-size: 0.88rem;
-    color: var(--color-texto);
+    color: var(--texto-principal);
     background: var(--optimo-item-bg);
     padding: 0.32rem 0.85rem;
     border-radius: 8px;
-    border: 1px solid var(--color-borde);
+    border: 1px solid var(--borde);
 }
 
-/* Nombre de la variable en verde */
+/* Nombre de la variable en dorado */
 .sol-bfs-item strong {
     color: var(--optimo-texto);
     margin-right: 0.3rem;
@@ -722,170 +1019,181 @@ footer {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   NAVEGACIÓN DE ITERACIONES — botones Anterior / Siguiente
-   Visibles solo en el layout con gráfico (2 variables)
+   LEYENDA DE OPTIMALIDAD — reemplaza a la leyenda de pivote
+   en la iteración óptima; explica el criterio Cj−Zj ≤ 0
 ═══════════════════════════════════════════════════════════════ */
-.sol-nav-buttons {
+.sol-optima-legend {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 1.2rem;
-    padding-top: 1.1rem;
-    border-top: 1px solid var(--color-borde);
-}
-
-/* Botón paso a paso "← Anterior" / "Siguiente →" */
-.sol-btn-step {
-    padding: 0.42rem 1.1rem;
+    align-items: flex-start;
+    gap: 0.55rem;
+    margin-top: 1rem;
+    padding: 0.65rem 0.95rem;
     border-radius: 8px;
-    border: 1px solid var(--color-borde);
-    background: var(--color-btn-dark);
-    color: var(--color-texto);
-    cursor: pointer;
-    font-size: 0.82rem;
-    font-family: inherit;
-    transition: background 0.18s, border-color 0.18s;
+    background: var(--optimo-badge-bg);
+    border: 1px solid var(--optimo-badge-borde);
+    font-size: 0.79rem;
+    color:var(--optimo-texto);
+    line-height: 1.5;
 }
 
-.sol-btn-step:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: var(--color-borde-hover);
-}
-
-.sol-btn-step:disabled {
-    opacity: 0.32;
-    cursor: not-allowed;
-}
-
-/* "Iteración X de N" entre los botones / "Ver iteración X ↓" en modo stacked */
-.sol-scroll-hint {
-    font-size: 0.77rem;
-    color: var(--color-texto-tenue);
-    text-align: center;
-}
-
-/* Versión clickeable del hint (modo sin gráfico) */
-.sol-scroll-hint--clickable {
-    cursor: pointer;
-    transition: color 0.18s;
-    padding: 0.3rem 0;
-}
-
-.sol-scroll-hint--clickable:hover {
-    color: var(--color-texto);
+/* Ícono de check dorado a la izquierda */
+.sol-optima-legend-icon {
+    color: var(--optimo-texto);
+    font-size: 0.9rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   PANEL DE EMPATE — aparece debajo del último tableau cuando hay
-   un empate en la variable de entrada o salida
+   HINT DE SCROLL — "Ver iteración X ↓" en modo sin gráfico
+   Aparece al pie de las matrices cuando hay más iteraciones
+═══════════════════════════════════════════════════════════════ */
+.sol-scroll-hint {
+    font-size: 0.77rem;
+    color: var(--texto-tenue);
+    text-align: center;
+}
+
+/* Versión clickeable — dorado para mayor visibilidad */
+.sol-scroll-hint--clickable {
+    cursor: pointer;
+    color: var(--gold);
+    font-weight: 500;
+    padding: 0.5rem 0;
+    transition: color 0.18s;
+}
+
+.sol-scroll-hint--clickable:hover {
+    color: var(--navy);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PANEL DE EMPATE — aparece cuando hay empate en entrada/salida
 ═══════════════════════════════════════════════════════════════ */
 .sol-empate {
     margin-top: 1.2rem;
     padding: 1.1rem 1.3rem;
     border-radius: 12px;
-    border: 1px solid rgba(251, 191, 36, 0.28);
-    background: rgba(245, 158, 11, 0.07);
+    border: 1px solid var(--gold-borde);
+    background: var(--gold-claro);
 }
 
-/* Texto descriptivo dentro del panel de empate */
+/* Texto descriptivo */
 .sol-empate-label {
     font-size: 0.82rem;
     color: var(--pivote-texto);
     margin: 0 0 0.8rem 0;
     font-weight: 500;
-    letter-spacing: 0.01em;
 }
 
-/* Contenedor flex de los botones de candidatos */
+/* Contenedor flex de botones candidatos */
 .sol-empate-btns {
     display: flex;
     flex-wrap: wrap;
     gap: 0.55rem;
 }
 
-/* Botón individual por cada variable candidata */
+/* Botón por cada variable candidata */
 .sol-empate-btn {
     padding: 0.38rem 1rem;
     border-radius: 8px;
-    border: 1px solid var(--pivote-borde);
-    background: var(--color-btn-dark);
+    border: 1px solid var(--gold-borde);
+    background: var(--blanco);
     color: var(--pivote-texto);
     cursor: pointer;
     font-size: 0.85rem;
     font-family: inherit;
     font-weight: 600;
-    letter-spacing: 0.03em;
-    transition: background 0.18s, border-color 0.18s, color 0.18s;
+    transition: background 0.18s, border-color 0.18s;
 }
 
 .sol-empate-btn:hover {
-    background: var(--pivote-bg);
-    border-color: rgba(245, 158, 11, 0.55);
-    color: #fde68a;
+    background: var(--gold-claro);
+    border-color: var(--gold);
 }
 
 /* Estado activo tras seleccionar (aplicado por JS antes del POST) */
 .sol-empate-btn--activo {
-    background: var(--pivote-bg);
-    border-color: rgba(245, 158, 11, 0.55);
-    opacity: 0.7;
+    background: var(--gold-claro);
+    border-color: var(--gold);
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   ANIMACIONES — equivalentes a framer-motion del prototipo React
-   Aplicadas por solucion.js al crear/recrear nodos del DOM
+   ANIMACIONES — tableau y sección óptima
+   Aplicadas por solucion.js al insertar/recrear nodos del DOM
 ═══════════════════════════════════════════════════════════════ */
 
-/* Tableau que aparece al avanzar (Siguiente →) */
+/* Tableau que aparece al avanzar (nodo siguiente en sidebar) */
 @keyframes sol-slide-down {
-    from { opacity: 0; transform: translateY(28px); }
+    from { opacity: 0; transform: translateY(22px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Tableau que aparece al retroceder (← Anterior) */
+/* Tableau que aparece al retroceder (nodo anterior en sidebar) */
 @keyframes sol-slide-up {
-    from { opacity: 0; transform: translateY(-28px); }
+    from { opacity: 0; transform: translateY(-22px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Sección óptima — aparece con escala */
+/* Sección óptima — aparece con escala suave */
 @keyframes sol-fade-scale {
-    from { opacity: 0; transform: scale(0.96); }
+    from { opacity: 0; transform: scale(0.97); }
     to   { opacity: 1; transform: scale(1); }
 }
 
-.anim-slide-down { animation: sol-slide-down 0.32s ease-out both; }
-.anim-slide-up   { animation: sol-slide-up   0.32s ease-out both; }
-.anim-fade-scale { animation: sol-fade-scale 0.35s ease-out 0.1s both; }
+.anim-slide-down { animation: sol-slide-down 0.28s ease-out both; }
+.anim-slide-up   { animation: sol-slide-up   0.28s ease-out both; }
+.anim-fade-scale { animation: sol-fade-scale 0.32s ease-out 0.08s both; }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE
+   RESPONSIVE — breakpoints de adaptación
 ═══════════════════════════════════════════════════════════════ */
 
-/* Tablet — layout con gráfico pasa a columna única */
-@media (max-width: 960px) {
-    .sol-split {
-        grid-template-columns: 1fr;
+/* Tablet grande: layout con gráfico pasa a 2 columnas (sidebar + contenido) */
+@media (max-width: 1100px) {
+    .sol-with-sidebar.sol-with-graph {
+        grid-template-columns: var(--sidebar-ancho) 1fr;
     }
 
     .sol-graph-panel {
         position: static;
+        padding: 0 1.8rem 1.5rem;
+        grid-column: 2; /* sigue en la segunda columna */
     }
 }
 
-/* Mobile — ajustes de pagina-inicio */
+/* Tablet: sidebar se reduce a solo el dot numérico */
+@media (max-width: 860px) {
+    :root {
+        --sidebar-ancho: 56px; /* solo el círculo numerado, sin etiqueta */
+    }
+
+    .sol-sidebar-title,
+    .sol-node-label {
+        display: none;
+    }
+
+    .sol-iter-node {
+        justify-content: center;
+        padding: 0.65rem 0;
+    }
+}
+
+/* Mobile: ajustes de pagina-inicio */
 @media (max-width: 768px) {
     .hero {
-        padding: 2rem 1.2rem 1.2rem;
+        padding: 2.5rem 1.2rem 1.5rem;
     }
 
     .title {
-        font-size: 1.75rem;
+        font-size: 1.9rem;
         letter-spacing: -0.2px;
     }
 
@@ -899,7 +1207,7 @@ footer {
     }
 
     .glass-card {
-        padding: 1.6rem 1.2rem;
+        padding: 1.8rem 1.4rem;
     }
 
     .form-header {
@@ -916,29 +1224,59 @@ footer {
     }
 
     footer {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.2rem;
         padding: 1rem;
-        text-align: center;
     }
 }
 
-/* Mobile — ajustes de pagina de solución */
+/* La nav mobile es invisible por defecto; el media query la activa */
+.sol-mobile-nav { display: none; }
+
+/* Mobile pequeño — layout a flujo normal, sin grid/flex de viewport fijo */
 @media (max-width: 600px) {
-    .sol-page-header,
+    /*
+     * Desktop usa overflow:hidden + grid con 1fr para mantener todo
+     * dentro del viewport. En mobile eso colapsa el contenido a 0px.
+     * Solución: display:block en ambos contenedores para flujo normal.
+     */
     .sol-main {
-        padding-left: 1rem;
-        padding-right: 1rem;
+        display: block;
+        overflow: visible;
     }
 
-    .sol-separator {
-        margin-left: auto;
-        margin-right: auto;
+    .sol-with-sidebar,
+    .sol-with-sidebar.sol-with-graph {
+        display: block;
+    }
+
+    .sol-iter-sidebar {
+        display: none;
+    }
+
+    /* Sin sidebar en mobile: el header vuelve a una columna */
+    .sol-page-header {
+        display: block;
+    }
+
+    .sol-page-header::before {
+        display: none;
+    }
+
+    .sol-scroll-area,
+    .sol-matrices-col {
+        padding: 1rem;
+    }
+
+    .sol-graph-panel {
+        position: static;
+        padding: 0 1rem 1.5rem;
+    }
+
+    .sol-page-header {
+        padding: 1rem 1rem 0.5rem;
     }
 
     .sol-title {
-        font-size: 1.2rem;
+        font-size: 1.15rem;
     }
 
     .sol-tableau-card {
@@ -949,12 +1287,50 @@ footer {
         font-size: 1.5rem;
     }
 
-    .sol-nav-buttons {
-        gap: 0.6rem;
+    /* Barra de navegación mobile — visible aquí, oculta en desktop por la regla de arriba */
+    .sol-mobile-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid var(--borde-suave);
+    }
+
+    .sol-mobile-nav-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--borde);
+        background: var(--blanco);
+        color: var(--navy);
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-family: inherit;
+        font-weight: 600;
+        transition: background 0.18s, border-color 0.18s;
+    }
+
+    .sol-mobile-nav-btn:hover:not(:disabled) {
+        background: var(--cream);
+        border-color: var(--gold);
+    }
+
+    .sol-mobile-nav-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
+
+    .sol-mobile-nav-indicator {
+        flex: 1;
+        text-align: center;
+        font-size: 0.78rem;
+        color: var(--texto-suave);
+        font-weight: 500;
     }
 }
 
-/* Mobile pequeño — nav y hero compactos */
+/* Mobile muy pequeño — nav compacto */
 @media (max-width: 400px) {
     .title {
         font-size: 1.5rem;

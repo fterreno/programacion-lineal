@@ -10,10 +10,12 @@
 </head>
 
 <body>
-    <nav class="nav">
-        <button class="btn-secondary">Documentacion</button>
-        {% block header %}{% endblock %}
-    </nav>
+    <header>
+        <nav class="nav">
+            <button class="btn-secondary">Documentacion</button>
+            {% block header %}{% endblock %}
+        </nav>
+    </header>
     <main>
         {% block contenido %}{% endblock %}
     </main>

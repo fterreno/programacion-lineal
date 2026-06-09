@@ -27,6 +27,11 @@
         return i === -1 ? 0 : iter.columna_vld[i];
     }
 
+    /* Color de restricción — fórmula única usada tanto en el SVG como en la leyenda */
+    function colorRestriccion(i) {
+        return 'hsl(' + ((i * 67 + 200) % 360) + ',65%,40%)';
+    }
+
     /* ════════════════════════════════════════════
        MATEMÁTICAS DEL GRÁFICO
     ════════════════════════════════════════════ */
@@ -112,8 +117,12 @@
 
     /* ════════════════════════════════════════════
        GRÁFICO SVG
+       Tema blanco: región factible en azul suave,
+       restricciones en HSL, función objetivo en
+       dorado discontinuo, punto óptimo en dorado
+       con tooltip SVG al hacer hover.
     ════════════════════════════════════════════ */
-    function construirGrafico(bfs, indiceIter) {
+    function construirGrafico(bfs, indiceIter, zValue, c1, c2) {
         var SIZE = 400;
         var mg = { t: 20, r: 20, b: 44, l: 52 };
         var pw = SIZE - mg.l - mg.r;
@@ -150,50 +159,50 @@
         svg.style.display = 'block';
         svg.style.aspectRatio = '1';
 
-        /* fondo */
-        svg.appendChild(el('rect', { x: 0, y: 0, width: SIZE, height: SIZE, fill: 'rgba(0,0,0,0.38)', rx: 8 }));
+        /* Fondo blanco */
+        svg.appendChild(el('rect', { x: 0, y: 0, width: SIZE, height: SIZE, fill: '#FAFAF9', rx: 8 }));
 
-        /* grid */
+        /* Grid — cream muy suave sobre blanco */
         var N = 5;
         for (var g = 0; g <= N; g++) {
             var gx = mg.l + (g / N) * pw;
             var gy = mg.t + (g / N) * ph;
-            svg.appendChild(el('line', { x1: gx, y1: mg.t,      x2: gx,       y2: mg.t + ph, stroke: '#1c1c1c', 'stroke-width': 0.5 }));
-            svg.appendChild(el('line', { x1: mg.l, y1: gy,      x2: mg.l + pw, y2: gy,       stroke: '#1c1c1c', 'stroke-width': 0.5 }));
+            svg.appendChild(el('line', { x1: gx, y1: mg.t,       x2: gx,        y2: mg.t + ph, stroke: '#EDE8DF', 'stroke-width': 0.8 }));
+            svg.appendChild(el('line', { x1: mg.l, y1: gy,       x2: mg.l + pw, y2: gy,        stroke: '#EDE8DF', 'stroke-width': 0.8 }));
         }
 
-        /* ejes */
-        svg.appendChild(el('line', { x1: px(0), y1: py(0), x2: px(maxX), y2: py(0),   stroke: '#444', 'stroke-width': 1 }));
-        svg.appendChild(el('line', { x1: px(0), y1: py(0), x2: px(0),    y2: py(maxY), stroke: '#444', 'stroke-width': 1 }));
+        /* Ejes — navy */
+        svg.appendChild(el('line', { x1: px(0), y1: py(0), x2: px(maxX), y2: py(0),    stroke: '#1B2A4A', 'stroke-width': 1.2 }));
+        svg.appendChild(el('line', { x1: px(0), y1: py(0), x2: px(0),    y2: py(maxY), stroke: '#1B2A4A', 'stroke-width': 1.2 }));
 
-        /* marcas en ejes */
+        /* Marcas en ejes — texto oscuro sobre blanco */
         for (var t = 0; t <= N; t++) {
             var xv = (t / N) * maxX, yv = (t / N) * maxY;
-            svg.appendChild(el('text', { x: px(xv), y: py(0) + 14, 'text-anchor': 'middle', fill: '#555', 'font-size': 9, 'font-family': 'Inter,sans-serif' }, Number(xv.toFixed(1)).toString()));
+            svg.appendChild(el('text', { x: px(xv), y: py(0) + 14, 'text-anchor': 'middle', fill: '#4A5568', 'font-size': 9, 'font-family': 'Inter,sans-serif' }, Number(xv.toFixed(1)).toString()));
             if (t > 0) {
-                svg.appendChild(el('text', { x: px(0) - 5, y: py(yv) + 3, 'text-anchor': 'end', fill: '#555', 'font-size': 9, 'font-family': 'Inter,sans-serif' }, Number(yv.toFixed(1)).toString()));
+                svg.appendChild(el('text', { x: px(0) - 5, y: py(yv) + 3, 'text-anchor': 'end', fill: '#4A5568', 'font-size': 9, 'font-family': 'Inter,sans-serif' }, Number(yv.toFixed(1)).toString()));
             }
         }
 
-        /* etiquetas ejes */
-        svg.appendChild(el('text', { x: mg.l + pw / 2, y: SIZE - 5, 'text-anchor': 'middle', fill: '#888', 'font-size': 11, 'font-family': 'Inter,sans-serif' }, 'x₁'));
-        var lx2 = el('text', { x: 12, y: mg.t + ph / 2, 'text-anchor': 'middle', fill: '#888', 'font-size': 11, 'font-family': 'Inter,sans-serif', transform: 'rotate(-90,12,' + (mg.t + ph / 2) + ')' }, 'x₂');
+        /* Etiquetas ejes — gris medio */
+        svg.appendChild(el('text', { x: mg.l + pw / 2, y: SIZE - 5, 'text-anchor': 'middle', fill: '#6B7280', 'font-size': 11, 'font-family': 'Inter,sans-serif' }, 'x₁'));
+        var lx2 = el('text', { x: 12, y: mg.t + ph / 2, 'text-anchor': 'middle', fill: '#6B7280', 'font-size': 11, 'font-family': 'Inter,sans-serif', transform: 'rotate(-90,12,' + (mg.t + ph / 2) + ')' }, 'x₂');
         svg.appendChild(lx2);
 
-        /* polígono región factible */
+        /* Polígono región factible — azul suave */
         if (verts.length >= 3) {
             svg.appendChild(el('polygon', {
                 points: verts.map(function (v) { return px(v[0]) + ',' + py(v[1]); }).join(' '),
-                fill: 'rgba(255,255,255,0.05)', stroke: 'rgba(255,255,255,0.2)', 'stroke-width': 1
+                fill: 'rgba(59, 130, 246, 0.10)', stroke: 'rgba(59, 130, 246, 0.38)', 'stroke-width': 1.5
             }));
         }
 
-        /* líneas de restricciones */
+        /* Líneas de restricciones — colores HSL sobre blanco (más oscuros que en tema dark) */
         _restricciones.forEach(function (r, i) {
-            var a1 = coef(r, 'x1'), a2 = coef(r, 'x2'), b = r.valor_lado_derecho;
-            var color = 'hsl(' + ((i * 67 + 200) % 360) + ',60%,55%)';
+            var color = colorRestriccion(i);
             var pts = null;
 
+            var a1 = coef(r, 'x1'), a2 = coef(r, 'x2'), b = r.valor_lado_derecho;
             if (Math.abs(a2) > 1e-10) {
                 var yi = b / a2;
                 var xi = Math.abs(a1) > 1e-10 ? b / a1 : null;
@@ -209,12 +218,35 @@
                 svg.appendChild(el('line', {
                     x1: px(pts[0][0]), y1: py(pts[0][1]),
                     x2: px(pts[1][0]), y2: py(pts[1][1]),
-                    stroke: color, 'stroke-width': 1.5, 'stroke-dasharray': '4,3'
+                    stroke: color, 'stroke-width': 1.6, 'stroke-dasharray': '5,3.5'
                 }));
             }
         });
 
-        /* etiquetas de intersecciones */
+        /* Función objetivo Z* — línea dorada discontinua */
+        if (Math.abs(c1) > 1e-10 || Math.abs(c2) > 1e-10) {
+            var objPts = null;
+            if (Math.abs(c2) > 1e-10) {
+                /* y-intercept en x1=0, x-intercept en x2=0 */
+                var y0Obj = zValue / c2;
+                var x0Obj = Math.abs(c1) > 1e-10 ? zValue / c1 : maxX;
+                var y1Obj = Math.abs(c1) > 1e-10 ? 0 : (zValue - c1 * maxX) / c2;
+                objPts = [[0, y0Obj], [x0Obj, y1Obj]];
+            } else if (Math.abs(c1) > 1e-10) {
+                var xVObj = zValue / c1;
+                objPts = [[xVObj, 0], [xVObj, maxY]];
+            }
+            if (objPts) {
+                svg.appendChild(el('line', {
+                    x1: px(objPts[0][0]), y1: py(objPts[0][1]),
+                    x2: px(objPts[1][0]), y2: py(objPts[1][1]),
+                    stroke: '#C8A96E', 'stroke-width': 1.8, 'stroke-dasharray': '6,4',
+                    opacity: 0.9
+                }));
+            }
+        }
+
+        /* Etiquetas de intersecciones — texto navy sobre blanco */
         todasIntersecciones(maxX, maxY).forEach(function (pt) {
             var x = pt[0], y = pt[1];
             var bx = px(x), by = py(y);
@@ -224,28 +256,43 @@
             var oy = nearBottom ? -14 : 12;
             var anchor = nearRight ? 'end' : 'start';
 
-            svg.appendChild(el('circle', { cx: bx, cy: by, r: 3, fill: 'rgba(255,255,255,0.5)' }));
+            svg.appendChild(el('circle', { cx: bx, cy: by, r: 3, fill: 'rgba(27, 42, 74, 0.35)' }));
             var tLabel = el('text', {
                 x: bx + ox, y: by + oy,
                 'text-anchor': anchor,
-                fill: 'rgba(210,220,216,0.9)',
+                fill: '#1B2A4A',
                 'font-size': 9, 'font-family': 'Inter,sans-serif',
                 'paint-order': 'stroke',
-                stroke: 'rgba(15,25,20,0.9)', 'stroke-width': 2.5, 'stroke-linejoin': 'round'
+                stroke: '#FAFAF9', 'stroke-width': 2.5, 'stroke-linejoin': 'round'
             }, '(' + Number(x.toFixed(2)) + ', ' + Number(y.toFixed(2)) + ')');
             svg.appendChild(tLabel);
         });
 
-        /* punto BFS */
+        /* Punto óptimo — círculo dorado con halo + tooltip SVG al hacer hover */
         var bpx = px(bfs.x1), bpy = py(bfs.x2);
-        svg.appendChild(el('circle', { cx: bpx, cy: bpy, r: 5, fill: '#fff', stroke: '#000', 'stroke-width': 1 }));
+        var tooltip = 'Óptimo · x₁ = ' + fmt(bfs.x1) + ' · x₂ = ' + fmt(bfs.x2) + ' · Z* = ' + fmt(zValue);
+
+        /* Halo dorado exterior */
+        svg.appendChild(el('circle', { cx: bpx, cy: bpy, r: 11, fill: 'rgba(200, 169, 110, 0.18)', stroke: 'none' }));
+
+        /* Punto dorado */
+        var bCircle = el('circle', { cx: bpx, cy: bpy, r: 6, fill: '#C8A96E', stroke: '#1B2A4A', 'stroke-width': 1.5 });
+        bCircle.appendChild(el('title', null, tooltip));
+        svg.appendChild(bCircle);
+
+        /* Área invisible más grande para facilitar el hover */
+        var hitArea = el('circle', { cx: bpx, cy: bpy, r: 16, fill: 'transparent', cursor: 'pointer' });
+        hitArea.appendChild(el('title', null, tooltip));
+        svg.appendChild(hitArea);
+
+        /* Etiqueta "Iter X" sobre el punto */
         var bLabel = el('text', {
-            x: bpx, y: bpy - 10,
-            'text-anchor': 'middle', fill: '#fff',
-            'font-size': 11, 'font-family': 'Inter,sans-serif',
+            x: bpx, y: bpy - 12,
+            'text-anchor': 'middle', fill: '#1B2A4A',
+            'font-size': 10, 'font-family': 'Inter,sans-serif', 'font-weight': 600,
             'paint-order': 'stroke',
-            stroke: 'rgba(15,25,20,0.8)', 'stroke-width': 2, 'stroke-linejoin': 'round'
-        }, 'Iter ' + indiceIter);
+            stroke: '#FAFAF9', 'stroke-width': 2.5, 'stroke-linejoin': 'round'
+        }, indiceIter === 0 ? 'Inicial' : 'Iter ' + indiceIter);
         svg.appendChild(bLabel);
 
         return svg;
@@ -290,11 +337,7 @@
         badge.className = 'sol-iter-badge' + (esOptima ? ' sol-iter-badge--optima' : '');
         badge.textContent = esOptima ? 'Óptimo' : titulo;
 
-        var h3 = document.createElement('h3');
-        h3.textContent = esOptima ? 'Solución Óptima' : titulo;
-
         header.appendChild(badge);
-        header.appendChild(h3);
         card.appendChild(header);
 
         /* ── tabla ──────────────────────────── */
@@ -387,7 +430,7 @@
         wrapper.appendChild(table);
         card.appendChild(wrapper);
 
-        /* ── leyenda pivote ─────────────────── */
+        /* ── leyenda de pivote (iteraciones intermedias) ── */
         if (!esOptima && variable_entrada && variable_salida) {
             var legend = document.createElement('div');
             legend.className = 'sol-pivot-legend';
@@ -396,6 +439,23 @@
                 '<span class="sol-legend-item"><span class="sol-legend-dot sol-dot-red"></span>Sale: <strong>' + variable_salida + '</strong></span>' +
                 '<span class="sol-legend-item"><span class="sol-legend-dot sol-dot-amber"></span>Pivote</span>';
             card.appendChild(legend);
+        }
+
+        /* ── leyenda de optimalidad (última iteración óptima) ── */
+        if (esOptima) {
+            var optLegend = document.createElement('div');
+            optLegend.className = 'sol-optima-legend';
+
+            var icon = document.createElement('span');
+            icon.className = 'sol-optima-legend-icon';
+            icon.textContent = '✓';
+
+            var txt = document.createElement('span');
+            txt.innerHTML = 'Todos los C<sub>j</sub>−Z<sub>j</sub> ≤ 0 para las variables no básicas — criterio de optimalidad alcanzado.';
+
+            optLegend.appendChild(icon);
+            optLegend.appendChild(txt);
+            card.appendChild(optLegend);
         }
 
         return card;
@@ -494,20 +554,180 @@
 
 
     /* ════════════════════════════════════════════
+       NAVEGACIÓN MOBILE — barra Anterior / Siguiente
+       Solo visible en pantallas ≤600px (CSS la oculta
+       en desktop). Sustituye al sidebar en mobile.
+    ════════════════════════════════════════════ */
+    function crearNavMobile(activeIdx, total, onNavegar) {
+        var nav = document.createElement('div');
+        nav.className = 'sol-mobile-nav';
+
+        var btnPrev = document.createElement('button');
+        btnPrev.className = 'sol-mobile-nav-btn';
+        btnPrev.textContent = '← Anterior';
+        btnPrev.disabled = activeIdx === 0;
+        btnPrev.addEventListener('click', function () { onNavegar(activeIdx - 1); });
+
+        var indicator = document.createElement('span');
+        indicator.className = 'sol-mobile-nav-indicator';
+        var label = activeIdx === 0 ? 'Inicial' : 'Iteración ' + activeIdx;
+        indicator.textContent = label + ' (' + (activeIdx + 1) + '/' + total + ')';
+
+        var btnNext = document.createElement('button');
+        btnNext.className = 'sol-mobile-nav-btn';
+        btnNext.textContent = 'Siguiente →';
+        btnNext.disabled = activeIdx === total - 1;
+        btnNext.addEventListener('click', function () { onNavegar(activeIdx + 1); });
+
+        nav.appendChild(btnPrev);
+        nav.appendChild(indicator);
+        nav.appendChild(btnNext);
+        return nav;
+    }
+
+    /* ════════════════════════════════════════════
+       SIDEBAR DE ITERACIONES
+       Panel lateral navy con un nodo por iteración.
+       activeIdx  — nodo que aparece resaltado.
+       onNavegar(i) — callback al hacer click en nodo i.
+    ════════════════════════════════════════════ */
+    function crearSidebar(activeIdx, onNavegar) {
+        var aside = document.createElement('aside');
+        aside.className = 'sol-iter-sidebar';
+
+        /* inner sticky: el contenido queda visible al hacer scroll */
+        var inner = document.createElement('div');
+        inner.className = 'sol-sidebar-inner';
+
+        var titulo = document.createElement('div');
+        titulo.className = 'sol-sidebar-title';
+        titulo.textContent = 'Iteraciones';
+        inner.appendChild(titulo);
+
+        if (_iteraciones.length === 0) {
+            aside.appendChild(inner);
+            return aside;
+        }
+
+        _iteraciones.forEach(function (iter, i) {
+            var esUlt    = i === _iteraciones.length - 1;
+            var esOpt    = esUlt && !_empate && (iter.variable_entrada === null || iter.variable_entrada === undefined);
+            var esInicial = i === 0;
+
+            var node = document.createElement('div');
+            var clases = 'sol-iter-node';
+            if (i === activeIdx)                       clases += ' sol-iter-node--active';
+            else if (!_conGrafico && i > activeIdx)    clases += ' sol-iter-node--future';
+            if (esOpt)                                 clases += ' sol-iter-node--optima';
+            if (esInicial)                             clases += ' sol-iter-node--inicial';
+            node.className = clases;
+
+            /* dot: checkmark verde para el óptimo, número para el resto */
+            var dot = document.createElement('span');
+            dot.className = 'sol-node-dot';
+            dot.textContent = esOpt ? '✓' : String(i);
+
+            /* etiqueta: "Inicial", "Óptimo" o "Iteración N" */
+            var label = document.createElement('span');
+            label.className = 'sol-node-label';
+            label.textContent = esInicial ? 'Inicial' : (esOpt ? 'Óptimo' : 'Iteración ' + i);
+
+            node.appendChild(dot);
+            node.appendChild(label);
+            node.addEventListener('click', function () { onNavegar(i); });
+
+            inner.appendChild(node);
+        });
+
+        /* ── Panel de resumen óptimo al pie del sidebar ── */
+        var ultimaIter = _iteraciones[_iteraciones.length - 1];
+        var esSolucionOptima = ultimaIter && !_empate &&
+            (ultimaIter.variable_entrada === null || ultimaIter.variable_entrada === undefined);
+
+        if (esSolucionOptima) {
+            var zOpt = ultimaIter.columna_cb.reduce(function (s, cb, i) {
+                return s + cb * ultimaIter.columna_vld[i];
+            }, 0);
+
+            var summary = document.createElement('div');
+            summary.className = 'sol-sidebar-summary';
+
+            /* Estado */
+            var estadoDiv = document.createElement('div');
+            estadoDiv.className = 'sol-sidebar-summary-estado';
+            estadoDiv.textContent = '✓ Solución Óptima';
+            summary.appendChild(estadoDiv);
+
+            /* Iteraciones */
+            var iterLabel = document.createElement('div');
+            iterLabel.className = 'sol-sidebar-summary-label';
+            iterLabel.textContent = 'Iteraciones';
+            summary.appendChild(iterLabel);
+
+            var iterVal = document.createElement('div');
+            iterVal.className = 'sol-sidebar-summary-value';
+            iterVal.textContent = String(_iteraciones.length - 1);
+            summary.appendChild(iterVal);
+
+            /* Z* */
+            var zLabel = document.createElement('div');
+            zLabel.className = 'sol-sidebar-summary-label';
+            zLabel.textContent = 'Z⨯';
+            summary.appendChild(zLabel);
+
+            var zVal = document.createElement('div');
+            zVal.className = 'sol-sidebar-summary-value';
+            zVal.textContent = fmt(zOpt);
+            summary.appendChild(zVal);
+
+            /* Variables de decisión */
+            if (_vars.length > 0) {
+                var varsLabel = document.createElement('div');
+                varsLabel.className = 'sol-sidebar-summary-label';
+                varsLabel.textContent = 'Variables';
+                summary.appendChild(varsLabel);
+
+                var varsDiv = document.createElement('div');
+                varsDiv.className = 'sol-sidebar-summary-vars';
+                _vars.forEach(function (v) {
+                    var varEl = document.createElement('div');
+                    varEl.className = 'sol-sidebar-summary-var';
+                    varEl.innerHTML = '<strong>' + v + '</strong> = ' + fmt(valorBFS(v, ultimaIter));
+                    varsDiv.appendChild(varEl);
+                });
+                summary.appendChild(varsDiv);
+            }
+
+            inner.appendChild(summary);
+        }
+
+        aside.appendChild(inner);
+        return aside;
+    }
+
+
+    /* ════════════════════════════════════════════
        LAYOUT CON GRÁFICO
     ════════════════════════════════════════════ */
     function renderConGrafico(root) {
-        var iter    = _iteraciones[_indice];
-        var esUlt   = _indice === _iteraciones.length - 1;
+        var iter         = _iteraciones[_indice];
+        var esUlt        = _indice === _iteraciones.length - 1;
         var esEmpateAqui = esUlt && _empate !== null;
-        var esOpt   = esUlt && !esEmpateAqui && (iter.variable_entrada === null || iter.variable_entrada === undefined);
-        var z       = iter.columna_cb.reduce(function (s, cb, i) { return s + cb * iter.columna_vld[i]; }, 0);
-        var bfs     = { x1: valorBFS('x1', iter), x2: valorBFS('x2', iter) };
+        var esOpt        = esUlt && !esEmpateAqui && (iter.variable_entrada === null || iter.variable_entrada === undefined);
+        var z            = iter.columna_cb.reduce(function (s, cb, i) { return s + cb * iter.columna_vld[i]; }, 0);
+        var bfs          = { x1: valorBFS('x1', iter), x2: valorBFS('x2', iter) };
 
-        root.className = 'sol-split';
+        root.className = 'sol-with-sidebar sol-with-graph';
         root.innerHTML = '';
 
-        /* columna izquierda */
+        /* sidebar */
+        root.appendChild(crearSidebar(_indice, function (idx) {
+            _direccion = idx > _indice ? 'down' : 'up';
+            _indice = idx;
+            renderConGrafico(root);
+        }));
+
+        /* columna central — tableau */
         var left = document.createElement('div');
         left.className = 'sol-scroll-area';
 
@@ -526,53 +746,74 @@
             left.appendChild(construirEmpateUI());
         }
 
-        /* botones prev/next */
-        var nav = document.createElement('div');
-        nav.className = 'sol-nav-buttons';
-
-        var btnAnt = document.createElement('button');
-        btnAnt.className = 'sol-btn-step';
-        btnAnt.textContent = '← Anterior';
-        if (_indice === 0) btnAnt.disabled = true;
-        btnAnt.addEventListener('click', function () {
-            _direccion = 'up';
-            _indice = Math.max(_indice - 1, 0);
+        /* navegación mobile — visible solo en ≤600px via CSS */
+        left.appendChild(crearNavMobile(_indice, _iteraciones.length, function (idx) {
+            _direccion = idx > _indice ? 'down' : 'up';
+            _indice = idx;
             renderConGrafico(root);
-        });
+        }));
 
-        var hint = document.createElement('span');
-        hint.className = 'sol-scroll-hint';
-        hint.textContent = 'Iteración ' + (_indice + 1) + ' de ' + _iteraciones.length;
+        root.appendChild(left);
 
-        var btnSig = document.createElement('button');
-        btnSig.className = 'sol-btn-step';
-        btnSig.textContent = 'Siguiente →';
-        if (esUlt) btnSig.disabled = true;
-        btnSig.addEventListener('click', function () {
-            _direccion = 'down';
-            _indice = Math.min(_indice + 1, _iteraciones.length - 1);
-            renderConGrafico(root);
-        });
-
-        nav.appendChild(btnAnt);
-        nav.appendChild(hint);
-        nav.appendChild(btnSig);
-        left.appendChild(nav);
-
-        /* columna derecha (gráfico) */
+        /* columna derecha — gráfico */
         var graphPanel = document.createElement('div');
         graphPanel.className = 'sol-graph-panel';
 
         var graphCard = document.createElement('div');
         graphCard.className = 'sol-graph-card';
 
+        /* Header del gráfico: título + leyenda de restricciones + función objetivo */
+        var graphHdr = document.createElement('div');
+        graphHdr.className = 'sol-graph-header';
+
         var h4 = document.createElement('h4');
         h4.textContent = 'Región Factible';
-        graphCard.appendChild(h4);
-        graphCard.appendChild(construirGrafico(bfs, _indice));
+        graphHdr.appendChild(h4);
+
+        var legendaGrafico = document.createElement('div');
+        legendaGrafico.className = 'sol-graph-constraint-legend';
+
+        _restricciones.forEach(function (r, i) {
+            var color = colorRestriccion(i);
+            var item = document.createElement('span');
+            item.className = 'sol-graph-legend-item';
+
+            var linea = document.createElement('span');
+            linea.className = 'sol-graph-legend-line';
+            linea.style.background = color;
+
+            item.appendChild(linea);
+            item.appendChild(document.createTextNode('R' + (i + 1)));
+            legendaGrafico.appendChild(item);
+        });
+
+        /* Entrada de la función objetivo Z* en la leyenda */
+        var objLegItem = document.createElement('span');
+        objLegItem.className = 'sol-graph-legend-item';
+
+        var objLinea = document.createElement('span');
+        objLinea.className = 'sol-graph-legend-line sol-graph-legend-line--dashed';
+
+        objLegItem.appendChild(objLinea);
+        objLegItem.appendChild(document.createTextNode('Z*'));
+        legendaGrafico.appendChild(objLegItem);
+
+        graphHdr.appendChild(legendaGrafico);
+        graphCard.appendChild(graphHdr);
+
+        /* Coeficientes de la función objetivo para trazar la línea Z* */
+        var c1 = 0, c2 = 0;
+        if (_iteraciones.length > 0) {
+            var fila0  = _iteraciones[0];
+            var ix1    = fila0.fila_etiqueta.indexOf('x1');
+            var ix2    = fila0.fila_etiqueta.indexOf('x2');
+            if (ix1 !== -1) c1 = fila0.fila_cj[ix1];
+            if (ix2 !== -1) c2 = fila0.fila_cj[ix2];
+        }
+
+        graphCard.appendChild(construirGrafico(bfs, _indice, z, c1, c2));
         graphPanel.appendChild(graphCard);
 
-        root.appendChild(left);
         root.appendChild(graphPanel);
     }
 
@@ -583,9 +824,25 @@
         var ultima = _iteraciones[_iteraciones.length - 1];
         var zOpt   = ultima.columna_cb.reduce(function (s, cb, i) { return s + cb * ultima.columna_vld[i]; }, 0);
 
-        root.className = 'sol-single';
+        root.className = 'sol-with-sidebar';
         root.innerHTML = '';
 
+        /* sidebar */
+        root.appendChild(crearSidebar(_visibles - 1, function (idx) {
+            if (idx + 1 > _visibles) {
+                _visibles = idx + 1;
+            }
+            renderSinGrafico(root);
+            setTimeout(function () {
+                var newCol = root.querySelector('.sol-matrices-col');
+                if (!newCol) return;
+                var cards = newCol.querySelectorAll('.sol-tableau-card');
+                var target = cards[Math.min(idx, cards.length - 1)];
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 60);
+        }));
+
+        /* columna de matrices apiladas */
         var col = document.createElement('div');
         col.className = 'sol-matrices-col';
 
@@ -612,12 +869,21 @@
                 _visibles++;
                 renderSinGrafico(root);
                 setTimeout(function () {
-                    var last = col.lastElementChild;
-                    if (last) last.scrollIntoView({ behavior: 'smooth' });
-                }, 50);
+                    var newCol = root.querySelector('.sol-matrices-col');
+                    if (newCol) {
+                        var last = newCol.lastElementChild;
+                        if (last) last.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 60);
             });
             col.appendChild(hint);
         }
+
+        /* navegación mobile — Anterior/Siguiente sobre _visibles */
+        col.appendChild(crearNavMobile(_visibles - 1, _iteraciones.length, function (idx) {
+            _visibles = idx + 1;
+            renderSinGrafico(root);
+        }));
 
         root.appendChild(col);
     }

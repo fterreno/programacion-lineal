@@ -9,7 +9,7 @@
 {% block contenido %}
 
 <header class="hero">
-    <h1 class="title">Resuelve Programacion Lineal</h1>
+    <h1 class="title">Resuelve <span class="title-accent">Programacion</span> Lineal</h1>
     <p class="subtitle">
         Resuelve modelos complejos mediante Método Gráfico, Simplex o Base Artificial.
         Iteraciones detalladas con tablas de pivoteo. Manejo de variables de holgura, exceso y artificiales.
@@ -48,13 +48,13 @@
                     </div>
             
                     <div class="constraints-area">
-                        <label for="restricciones">Restricciones (Forma Explícita)</label>
+                        <label for="restricciones">Restricciones</label>
                         <textarea name="restricciones" placeholder="ej: 2x1 + x2 <= 10&#10;x1 + 3x2 >= 15" rows="4"
                             oninput="actualizarKatex()"></textarea>
                     </div>
             
                     <div class="katex-block" id="katex-block" style="display: none;">
-                        <h4>Función Objetivo</h4>
+                        <h4>Forma Explicita</h4>
                         <div id="katex-output"></div>
                     </div>
             
